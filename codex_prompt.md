@@ -82,6 +82,13 @@ Reported in:
 - Only the `srpoyrek/RISC-V` repo was vendored.
 - Current accelerator simulation is standalone and not yet integrated with a full CPU system.
 
+## Core Integration Status (Explicit)
+
+- Standalone accelerator simulation: done and passing.
+- Custom instruction path from CPU: not done.
+- Assembly/machine-code driven integration test: not done.
+- Hardware deployment on Pynq-Z2: not started.
+
 ## Why This Path Was Chosen
 
 Mid-sem needed demonstrable output quickly.  
@@ -143,6 +150,15 @@ Output artifacts:
   2. CPU+accelerator simulation
   3. Vivado integration on Pynq-Z2
   4. on-board timing collection
+
+## Integration Checklist (Next Engineer)
+
+1. Clone or vendor PicoRV32 in a dedicated directory (`core/picorv32` or similar).
+2. Define one custom matmul instruction contract (opcode/funct fields and semantics).
+3. Implement coprocessor wrapper between core and `midsem_sim` accelerator (`start/busy/done`).
+4. Add a simulation program/testbench that issues the custom instruction and validates output matrix.
+5. Record instruction-triggered cycle counts in a markdown artifact similar to `MIDSEM_RESULTS.md`.
+6. Update `README.md` and this file with exact run commands and expected output lines.
 
 ## Operational Notes For Next Codex Session
 

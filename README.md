@@ -33,6 +33,22 @@ Based on the upstream README, the core includes:
 - Stabilize accelerator + custom instruction interface in simulation before FPGA deployment.
 - Transition from analytic speedup estimates to measured board timings (ARM and `mcycle`).
 
+## Core Integration Status
+
+- Accelerator is currently validated in standalone RTL simulation (`midsem_sim`).
+- CPU-core integration is **not implemented yet**.
+- No assembly or machine-code-driven custom instruction path has been tested yet.
+- No replacement core (for example PicoRV32) has been added yet.
+
+## Planned Core Integration Path
+
+1. Add a proven integration-ready RV32 core (recommended: PicoRV32).
+2. Wrap the accelerator with a coprocessor/custom-op interface (`start`, `busy`, `done`).
+3. Add decode/handshake logic so a custom instruction triggers matrix multiply.
+4. Build CPU+accelerator simulation testbench and verify correctness plus stall behavior.
+5. Replace analytic speedup estimates with measured cycle counts (`mcycle` / ARM timing).
+6. Move to Vivado/Pynq-Z2 hardware integration after simulation sign-off.
+
 ## Midsem Simulation Quick Start
 
 Run from repository root:
