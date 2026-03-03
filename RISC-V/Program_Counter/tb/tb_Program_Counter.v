@@ -5,7 +5,6 @@
 //Updates the Program Counter value
 //Updates:
 
-<<<<<<< HEAD
 module tb_Program_Counter();
 
 reg clk, rst;
@@ -42,10 +41,6 @@ initial begin
     stall <= 0; PCWrite <= 0; PCSrc <= 4;
     @(posedge clk);
 
-
 end
 
-=======
-module tb_program_counter();
->>>>>>> 7591e019793463fe27de9ca90834d0a425748db3
 endmodule

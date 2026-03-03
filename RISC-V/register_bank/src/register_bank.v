@@ -19,12 +19,21 @@ output [n_bit-1:0] Rd_data_1, Rd_data_2; // 32-bit datat at given register addre
 
 reg [n_bit-1:0] bank [n_reg-1:0];  // register bank of n_bit's having n_reg's
 
-assign Rd_data_1 = bank [Rd_reg_1]; // assgin the data for specific register address
-assign Rd_data_2 = bank [Rd_reg_2];
+assign Rd_data_1 = (Rd_reg_1 == 0) ? 32'h0 : bank[Rd_reg_1]; // x0 is hardwired to zero
+assign Rd_data_2 = (Rd_reg_2 == 0) ? 32'h0 : bank[Rd_reg_2];
+
+integer i;
 
 always @ (posedge Clk) begin
-	if (Rst) begin
-		if (Reg_write) bank[Wr_reg] <= Wr_data;  // write the register on reg_write signal
+	if (!Rst) begin
+		// Reset: Clear all registers to 0
+		for (i = 0; i < n_reg; i = i + 1) begin
+			bank[i] <= 32'h0;
+		end
+	end
+	else begin
+		// Normal operation: Write if enabled
+		if (Reg_write && (Wr_reg != 0)) bank[Wr_reg] <= Wr_data;
 	end
 end
 
