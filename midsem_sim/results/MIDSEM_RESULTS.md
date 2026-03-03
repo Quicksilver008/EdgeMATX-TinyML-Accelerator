@@ -6,8 +6,25 @@
 |---|---:|---:|
 | `identity` | 1 | 10 |
 | `ones` | 1 | 10 |
+| `signed_mixed` | 1 | 10 |
+| `overflow_wrap` | 1 | 10 |
+| `start_while_busy` | 1 | 10 |
+| `reset_abort` | 1 | 0 |
+| `post_reset_recovery` | 1 | 10 |
+| `random_0` | 1 | 10 |
+| `random_1` | 1 | 10 |
+| `random_2` | 1 | 10 |
+| `random_3` | 1 | 10 |
+| `random_4` | 1 | 10 |
+| `random_5` | 1 | 10 |
+| `random_6` | 1 | 10 |
+| `random_7` | 1 | 10 |
+| `random_8` | 1 | 10 |
+| `random_9` | 1 | 10 |
+| `random_10` | 1 | 10 |
+| `random_11` | 1 | 10 |
 
-Overall pass rate: **2 / 2**
+Overall pass rate: **19 / 19**
 
 ## Analytic Comparison (Cycle Model)
 

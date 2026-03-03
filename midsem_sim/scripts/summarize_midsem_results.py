@@ -59,7 +59,8 @@ def render_markdown(cases, summary):
         )
         lines.append("")
 
-    accel_cycles = min((c["accel_cycles"] for c in cases), default=None)
+    positive_cycles = [c["accel_cycles"] for c in cases if c["accel_cycles"] > 0]
+    accel_cycles = min(positive_cycles, default=None)
     if accel_cycles is not None:
         n = 4
         sw_cycles = scalar_sw_cycle_model(n)
