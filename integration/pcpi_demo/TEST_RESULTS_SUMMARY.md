@@ -6,8 +6,8 @@ This document consolidates the latest simulation evidence for the PCPI demo, inc
 
 Code snapshot context:
 
-1. Robustness + MUL comparison commit: `86ef180`
-2. Documentation consolidation commit: `2f451a3`
+1. Unified smoke+cycle firmware source commit: `3e805d3`
+2. Isolated custom 3-variant compare flow commit: `8630966`
 
 ## 1) Latest Test Matrix
 
@@ -20,6 +20,8 @@ Code snapshot context:
 | Professor demo suite | `.\integration\pcpi_demo\scripts\run_pcpi_professor_demo.ps1` | 2026-03-05 | PASS (5/5) | `pcpi_prof_demo_summary.json` |
 | Cycle comparison (accelerator vs SW no-MUL vs SW MUL) | `.\integration\pcpi_demo\scripts\run_cycle_compare.ps1` | 2026-03-05 | PASS | `pcpi_cycle_compare_summary.json` |
 | Custom real-input isolated case flow | `python .\integration\pcpi_demo\tests\real_to_q5_10_case.py --input-json .\integration\pcpi_demo\tests\sample_real_input.json --append-custom --name custom_demo_identity` then `.\integration\pcpi_demo\scripts\run_pcpi_custom_case.ps1 -CaseName custom_demo_identity` | 2026-03-05 | PASS | custom case conversion + isolated run PASS (`TB_CYCLES=869`) |
+| Custom isolated 3-variant cycle compare | `.\integration\pcpi_demo\scripts\run_pcpi_custom_cycle_compare.ps1 -CaseName custom_rand_case1` and `-CaseName custom_rand_case2` | 2026-03-05 | PASS | both cases PASS in accel + sw-no-mul + sw-mul with per-case summaries |
+| Live evaluator one-command flow | edit `.\integration\pcpi_demo\tests\live_real_input.json`, then run `.\integration\pcpi_demo\scripts\run_pcpi_custom_cycle_compare.ps1` | 2026-03-05 | PASS | auto real->Q5.10 + auto firmware case + 3-way compare (`live_eval_active`) |
 | One-command gate | `.\integration\pcpi_demo\scripts\run_pcpi_local_check.ps1` | 2026-03-05 | PASS | `smoke-asm + smoke-c + regression + handoff` all PASS |
 
 ## 2) Cycle Comparison Results (Same Matrix Case)
@@ -38,6 +40,14 @@ Derived ratios:
 2. Accelerator speedup over SW MUL-enabled: `7975 / 673 = 11.8499x`
 3. SW MUL benefit over SW no-MUL: `26130 / 7975 = 3.2765x`
 
+## 2B) Custom Isolated 3-Variant Results (Random Cases)
+
+| Case | Accel Cycles | SW no-MUL Cycles | SW MUL Cycles | SW no-MUL / Accel | SW MUL / Accel |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `custom_rand_case1` | 673 | 36246 | 7975 | 53.8574x | 11.8499x |
+| `custom_rand_case2` | 673 | 36034 | 7975 | 53.5423x | 11.8499x |
+| `live_eval_active` | 673 | 36246 | 7975 | 53.8574x | 11.8499x |
+
 ## 3) Intricacies That Matter
 
 1. This is a same-core comparison: all paths run on PicoRV32.
@@ -54,6 +64,8 @@ Derived ratios:
    - custom generated entries are stored in `integration/pcpi_demo/tests/custom_cases.json`
    - explicit cleanup is available via `--clear-generated`
 9. Smoke-C and cycle-compare now share one firmware source (`integration/pcpi_demo/firmware/firmware_matmul_unified.c`) with compile-time mode/address macros; regression/prof/handoff default paths remain unchanged.
+10. Isolated custom 3-way compare also uses the same unified firmware source; selected case data is injected through generated header arrays.
+11. Custom 3-way flow now also emits per-case `*_outputs_real.json` containing Q5.10 and real-format matrix output for all 3 variants.
 
 ## 4) Source Artifacts
 
@@ -66,3 +78,5 @@ Derived ratios:
 7. `integration/pcpi_demo/tests/custom_cases.json`
 8. `integration/pcpi_demo/tests/real_to_q5_10_case.py`
 9. `integration/pcpi_demo/firmware/firmware_matmul_unified.c`
+10. `integration/pcpi_demo/results/custom_cases/*_cycle_compare_summary.json`
+11. `integration/pcpi_demo/results/custom_cases/*_outputs_real.json`

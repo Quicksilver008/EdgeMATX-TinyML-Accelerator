@@ -38,7 +38,8 @@ Core pieces:
 
 1. CPU: `picorv32/picorv32.v`
 2. PCPI wrapper: `integration/pcpi_demo/rtl/pcpi_tinyml_accel.v`
-3. Accelerator RTL: `midsem_sim/rtl/matrix_accel_4x4_q5_10.v` (+ PE/issue/systolic modules)
+3. Accelerator RTL: `accel_standalone/rtl/matrix_accel_4x4_q5_10.v` (+ PE/issue/systolic modules)
+   - compatibility shim note: old `midsem_sim/` path still forwards to `accel_standalone/`.
 4. Testbenches:
    - PCPI integration smoke/regression: `tb_picorv32_pcpi_tinyml.v`
    - Handoff: `tb_picorv32_pcpi_handoff.v`
@@ -137,7 +138,7 @@ Important firmware variants:
      - software matmul path (`MATMUL_MODE_SW=1`)
    - compile-time base-address macros map to each testbench memory layout
 3. `firmware_c.c` and `firmware_sw_matmul.c`:
-   - retained as fallback/reference sources
+   - retained as fallback/reference sources under `integration/pcpi_demo/legacy/firmware/`
 4. `firmware_handoff.S`:
    - test regular instructions in-between two custom instructions
 
@@ -202,6 +203,21 @@ Outputs:
 .\integration\pcpi_demo\scripts\run_pcpi_handoff.ps1
 ```
 
+### 6.5 Custom case 3-way cycle comparison
+
+```powershell
+.\integration\pcpi_demo\scripts\run_pcpi_custom_cycle_compare.ps1 -CaseName <custom_case_name>
+```
+
+Outputs (per selected case):
+
+1. `integration/pcpi_demo/results/custom_cases/<case>_cycle_accel.log`
+2. `integration/pcpi_demo/results/custom_cases/<case>_cycle_sw_nomul.log`
+3. `integration/pcpi_demo/results/custom_cases/<case>_cycle_sw_mul.log`
+4. `integration/pcpi_demo/results/custom_cases/<case>_cycle_compare_summary.md`
+5. `integration/pcpi_demo/results/custom_cases/<case>_cycle_compare_summary.json`
+6. `integration/pcpi_demo/results/custom_cases/<case>_outputs_real.json` (per-variant output matrix in Q5.10 and real format)
+
 ## 7) Cycle Comparison Meaning (for oral explanation)
 
 All three paths run on PicoRV32 family.
@@ -229,8 +245,29 @@ You have three safe live methods:
 
 1. Real input template:
    - `integration/pcpi_demo/tests/sample_real_input.json`
-2. Isolated custom case store:
+2. Live one-file template (recommended in viva):
+   - `integration/pcpi_demo/tests/live_real_input.json`
+3. Isolated custom case store:
    - `integration/pcpi_demo/tests/custom_cases.json`
+
+One-command live mode (edit one file, run one command):
+
+```powershell
+.\integration\pcpi_demo\scripts\run_pcpi_custom_cycle_compare.ps1
+```
+
+Current checked-in live profile is seeded for near-50x no-MUL comparison and currently measures:
+1. `accel=673`, `sw_nomul=36246`, `sw_mul=7975`
+2. `sw_nomul/accel=53.8574x`
+3. `sw_mul/accel=11.8499x`
+
+What it does automatically:
+
+1. reads `live_real_input.json`
+2. converts to Q5.10
+3. generates isolated live case (`live_eval_active`)
+4. runs accelerator + sw-no-mul + sw-mul and writes cycle summary
+5. writes `<case>_outputs_real.json` with output matrix in Q5.10 and real values
 
 Convert evaluator real values to Q5.10 and preview:
 
@@ -248,6 +285,12 @@ Run one custom case:
 
 ```powershell
 .\integration\pcpi_demo\scripts\run_pcpi_custom_case.ps1 -CaseName <custom_case_name>
+```
+
+Run one custom case across all 3 performance variants:
+
+```powershell
+.\integration\pcpi_demo\scripts\run_pcpi_custom_cycle_compare.ps1 -CaseName <custom_case_name>
 ```
 
 Optional explicit cleanup of generated custom cases:
@@ -295,6 +338,7 @@ Then run:
 ```
 
 Method A is recommended during evaluator interaction because it keeps baseline regression vectors untouched.
+When evaluator asks for performance comparison on the same live input, run `run_pcpi_custom_cycle_compare.ps1`.
 
 ## 9) Converting Evaluator Values to Q5.10
 
@@ -552,6 +596,33 @@ Important code behavior:
 
 Why it matters:
 1. Single reference document to present progress quickly.
+
+### 13.11 `integration/pcpi_demo/scripts/run_pcpi_custom_cycle_compare.ps1`
+
+Function:
+1. Runs one selected custom case across accelerator, SW no-MUL, and SW MUL paths.
+
+Important code behavior:
+1. Uses shared firmware flow lock to avoid concurrent firmware rewrite races.
+2. Generates header data from chosen custom case, then compiles unified firmware for 3 variants.
+3. Runs corresponding TBs and extracts cycle markers.
+4. Writes per-case markdown/json speedup summary.
+
+Why it matters:
+1. Lets you benchmark evaluator-provided matrices without mutating baseline regression vectors.
+
+### 13.12 `integration/pcpi_demo/tests/gen_case_header.py`
+
+Function:
+1. Converts one named case from JSON into `firmware_case_data.h` used by unified C firmware.
+
+Important code behavior:
+1. Validates matrix lengths and values.
+2. Emits deterministic C arrays for `a_init` and `b_init`.
+3. Supports isolated custom-case pipeline wiring.
+
+Why it matters:
+1. Enables same firmware source to consume dynamic custom case inputs.
 
 ## 14) Final Midsem Readiness Statement
 

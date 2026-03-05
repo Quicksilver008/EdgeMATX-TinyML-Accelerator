@@ -13,7 +13,8 @@ Team Branch: main
 - PicoRV32 integrated with PCPI wrapper:
   - integration/pcpi_demo/rtl/pcpi_tinyml_accel.v
 - Accelerator RTL:
-  - midsem_sim/rtl/matrix_accel_4x4_q5_10.v
+  - accel_standalone/rtl/matrix_accel_4x4_q5_10.v
+  - compatibility shim: midsem_sim/scripts/run_midsem_sim.ps1 -> accel_standalone/scripts/run_midsem_sim.ps1
 - Custom instruction path is active and verified:
   - opcode custom-0, funct3=000, funct7=0101010
   - encoded demo word: 0x5420818b
@@ -72,6 +73,35 @@ Team Branch: main
   - baseline regression vectors remain in `tests/cases.json`
   - evaluator custom vectors are isolated in `tests/custom_cases.json`
 
+3.6 Evaluator custom-case 3-way cycle comparison (new)
+- Case-header generator:
+  - .\integration\pcpi_demo\tests\gen_case_header.py
+- 3-way runner:
+  - .\integration\pcpi_demo\scripts\run_pcpi_custom_cycle_compare.ps1
+- Result: PASS on two random cases
+- Measured:
+  - custom_rand_case1: accel=673, sw_no_mul=36246, sw_mul=7975
+  - custom_rand_case2: accel=673, sw_no_mul=36034, sw_mul=7975
+- Note:
+  - same unified firmware source is used for all 3 runs
+  - only compile-time mode/arch/address macros change
+
+3.7 Live evaluator one-file/one-command mode (new)
+- Reusable live input file:
+  - .\integration\pcpi_demo\tests\live_real_input.json
+- Single command:
+  - .\integration\pcpi_demo\scripts\run_pcpi_custom_cycle_compare.ps1
+- Automation inside command:
+  - real->Q5.10 conversion
+  - isolated generated case refresh (`live_eval_active`)
+  - 3-way compare run + summary generation
+  - per-case output matrix JSON in Q5.10 and real format (`*_outputs_real.json`)
+- Latest result:
+  - live_eval_active: accel=673, sw_no_mul=36246, sw_mul=7975
+  - speedup (sw_no_mul/accel)=53.8574x
+  - speedup (sw_mul/accel)=11.8499x
+  - note: default `live_real_input.json` is currently seeded for near-50x live demonstration.
+
 4) Cycle Comparison Update (Key Improvement)
 
 4.1 What is now compared
@@ -109,6 +139,10 @@ Important technical note:
 - Smoke-C and cycle-compare firmware are now unified at source level:
   - integration/pcpi_demo/firmware/firmware_matmul_unified.c
   - mode/address selection done via build-time EXTRA_CFLAGS macros.
+- Added isolated custom 3-way compare wiring:
+  - integration/pcpi_demo/tests/gen_case_header.py
+  - integration/pcpi_demo/scripts/run_pcpi_custom_cycle_compare.ps1
+  - firmware_matmul_unified.c supports external case arrays via `USE_EXTERNAL_CASE_DATA`
 
 6) Documentation and Handoff Discipline
 - Updated docs:
@@ -130,6 +164,7 @@ Important technical note:
 - integration/pcpi_demo/results/pcpi_prof_demo_summary.json
 - integration/pcpi_demo/HANDOFF_TEST_RESULTS.md
 - integration/pcpi_demo/tests/custom_cases.json
+- integration/pcpi_demo/results/custom_cases/*_cycle_compare_summary.json
 
 8) Suggested Live Demo Sequence
 - 1) run local gate:

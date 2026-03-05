@@ -9,6 +9,19 @@ $tbDir = Join-Path $demoDir "tb"
 $resultsDir = Join-Path $demoDir "results"
 $flowLockPath = Join-Path $fwDir ".firmware_flow.lock"
 
+function Resolve-AccelRoot {
+    $candidates = @("accel_standalone", "midsem_sim")
+    foreach ($candidate in $candidates) {
+        $root = Join-Path $repoRoot $candidate
+        if (Test-Path (Join-Path $root "rtl\matrix_accel_4x4_q5_10.v")) {
+            return $root
+        }
+    }
+    throw "Accelerator RTL root not found. Expected 'accel_standalone' or 'midsem_sim' with rtl sources."
+}
+
+$accelRoot = Resolve-AccelRoot
+
 New-Item -ItemType Directory -Force $resultsDir | Out-Null
 
 $accelLog = Join-Path $resultsDir "pcpi_cycle_accel.log"
@@ -115,10 +128,10 @@ function Run-Sim {
     $simExe = Join-Path $resultsDir ("{0}.out" -f $Name)
     $sources = @(
         (Join-Path $repoRoot "picorv32\picorv32.v"),
-        (Join-Path $repoRoot "midsem_sim\rtl\pe_cell_q5_10.v"),
-        (Join-Path $repoRoot "midsem_sim\rtl\issue_logic_4x4_q5_10.v"),
-        (Join-Path $repoRoot "midsem_sim\rtl\systolic_array_4x4_q5_10.v"),
-        (Join-Path $repoRoot "midsem_sim\rtl\matrix_accel_4x4_q5_10.v"),
+        (Join-Path $accelRoot "rtl\pe_cell_q5_10.v"),
+        (Join-Path $accelRoot "rtl\issue_logic_4x4_q5_10.v"),
+        (Join-Path $accelRoot "rtl\systolic_array_4x4_q5_10.v"),
+        (Join-Path $accelRoot "rtl\matrix_accel_4x4_q5_10.v"),
         (Join-Path $demoDir "rtl\pcpi_tinyml_accel.v"),
         (Join-Path $tbDir $TbFile)
     )

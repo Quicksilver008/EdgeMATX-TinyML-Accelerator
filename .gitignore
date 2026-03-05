@@ -1,3 +1,5 @@
+accel_standalone/results/*.out
+accel_standalone/results/*.vcd
 midsem_sim/results/*.out
 midsem_sim/results/*.vcd
 integration/pcpi_demo/results/*.out
@@ -20,6 +22,8 @@ integration/pcpi_demo/results/custom_cases/*.log
 integration/pcpi_demo/results/custom_cases/*.expected.json
 integration/pcpi_demo/results/custom_cases/*_cycle_compare_summary.md
 integration/pcpi_demo/results/custom_cases/*_cycle_compare_summary.json
+integration/pcpi_demo/results/custom_cases/*_outputs_real.json
+integration/pcpi_demo/tests/live_eval_cases.json
 integration/pcpi_demo/firmware/firmware_case_data.h
 integration/pcpi_demo/firmware/*.bin
 integration/pcpi_demo/firmware/*.elf

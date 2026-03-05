@@ -183,6 +183,24 @@ One-command local checker (smoke asm + smoke c + regression + handoff):
 
 Custom real-input case flow (isolated from baseline `tests/cases.json`):
 
+Fast live evaluator mode (one file + one command):
+
+1. edit `integration/pcpi_demo/tests/live_real_input.json`
+2. run:
+
+```powershell
+.\integration\pcpi_demo\scripts\run_pcpi_custom_cycle_compare.ps1
+```
+
+This auto-converts real input to Q5.10, injects generated case data into unified firmware, and runs all 3 variants.
+It also generates:
+- `integration/pcpi_demo/results/custom_cases/live_eval_active_outputs_real.json`
+
+Current checked-in live profile (`live_real_input.json`) is tuned for near-50x no-MUL comparison and currently measures:
+1. `accel=673`, `sw_nomul=36246`, `sw_mul=7975`
+2. `sw_nomul/accel=53.8574x`
+3. `sw_mul/accel=11.8499x`
+
 1. Convert real matrices to Q5.10 preview:
 
 ```powershell
@@ -201,7 +219,13 @@ python .\integration\pcpi_demo\tests\real_to_q5_10_case.py --input-json .\integr
 .\integration\pcpi_demo\scripts\run_pcpi_custom_case.ps1 -CaseName <custom_case_name>
 ```
 
-4. Optional explicit cleanup of generated custom cases:
+4. Run one custom case across all 3 variants (accelerator, SW no-MUL, SW MUL):
+
+```powershell
+.\integration\pcpi_demo\scripts\run_pcpi_custom_cycle_compare.ps1 -CaseName <custom_case_name>
+```
+
+5. Optional explicit cleanup of generated custom cases:
 
 ```powershell
 python .\integration\pcpi_demo\tests\real_to_q5_10_case.py --clear-generated
@@ -222,9 +246,13 @@ Firmware flow notes:
 - If toolchain is missing, asm smoke can use checked-in fallback:
   - `integration/pcpi_demo/firmware/firmware.hex`
 - C smoke variant requires a toolchain rebuild (no stale-hex fallback).
+- Accelerator RTL root is auto-resolved by scripts:
+  - preferred: `accel_standalone/rtl/`
+  - compatibility fallback: `midsem_sim/rtl/`
 - Legacy firmware sources retained as fallback/reference:
-  - `integration/pcpi_demo/firmware/firmware_c.c`
-  - `integration/pcpi_demo/firmware/firmware_sw_matmul.c`
+  - `integration/pcpi_demo/legacy/firmware/firmware_c.c`
+  - `integration/pcpi_demo/legacy/firmware/firmware_sw_matmul.c`
+  - See `integration/pcpi_demo/legacy/README.md` for rationale.
 
 Artifacts:
 
@@ -246,6 +274,9 @@ Artifacts:
 - `integration/pcpi_demo/results/pcpi_cycle_scaling_estimate.json`
 - `integration/pcpi_demo/results/custom_cases/*.log`
 - `integration/pcpi_demo/results/custom_cases/*.expected.json`
+- `integration/pcpi_demo/results/custom_cases/*_cycle_compare_summary.md`
+- `integration/pcpi_demo/results/custom_cases/*_cycle_compare_summary.json`
+- `integration/pcpi_demo/results/custom_cases/*_outputs_real.json`
 - `integration/pcpi_demo/docs/MIDSEM_COMPLETE_PROJECT_GUIDE.md`
 - `integration/pcpi_demo/simulation/gtkwave/pcpi_demo_signals.gtkw`
 - `integration/pcpi_demo/simulation/gtkwave/pcpi_handoff_signals.gtkw`
@@ -329,3 +360,15 @@ All regression checks use RTL-exact arithmetic:
 - arithmetic shift-right by 10
 - signed32 accumulation
 - final compare on low 16 bits (wrap), sign-extended to 32-bit memory word
+
+## Custom 3-Variant Compare (Isolated Cases)
+
+This flow uses the same unified source (`firmware_matmul_unified.c`) for all 3 runs and injects selected custom-case matrices via generated header data:
+
+1. generator: `integration/pcpi_demo/tests/gen_case_header.py`
+2. runner: `integration/pcpi_demo/scripts/run_pcpi_custom_cycle_compare.ps1`
+
+Latest verified random custom examples (2026-03-05):
+
+1. `custom_rand_case1`: accel `673`, sw-no-mul `36246`, sw-mul `7975`
+2. `custom_rand_case2`: accel `673`, sw-no-mul `36034`, sw-mul `7975`

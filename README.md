@@ -2,13 +2,24 @@
 
 TinyML-Accelerator is a major project focused on building a TinyML accelerator on top of a RISC-V based hardware platform.
 
-## Current Repository Layout
+## Primary Areas
 
-- `RISC-V/`: Vendored Verilog implementation of a 5-stage pipelined RV32I core and related modules.
+- `start_here/`: Quick-entry docs for evaluation commands and live demo flow.
+- `integration/pcpi_demo/`: Primary PicoRV32+PCPI+accelerator integration flow.
+- `accel_standalone/`: Standalone accelerator RTL evaluation flow (renamed from `midsem_sim`).
 - `picorv32/`: Vendored PicoRV32 core from YosysHQ.
-- `midsem_sim/`: Self-contained systolic-array simulation flow for mid-sem evaluation.
-- `integration/pcpi_demo/`: First PicoRV32+PCPI+accelerator integration demo.
-- `README.md`: Top-level project documentation.
+- `RISC-V/`: Vendored Verilog implementation of a 5-stage pipelined RV32I core.
+
+## Legacy / Fallback Areas
+
+- `midsem_sim/`: Compatibility shim for old command paths (forwards to `accel_standalone`).
+- `integration/pcpi_demo/legacy/`: Fallback/reference assets kept separate from active flow.
+
+## Where To Go First
+
+1. `start_here/README.md`
+2. `start_here/EVAL_FLOW.md`
+3. `integration/pcpi_demo/README.md`
 
 ## Dependencies (Install Before Running)
 
@@ -68,13 +79,13 @@ Based on the upstream README, the core includes:
 
 ## Next Development Focus
 
-- Show simulation-first progress in mid-sem using `midsem_sim`.
+- Show simulation-first progress in mid-sem using `accel_standalone`.
 - Stabilize accelerator + custom instruction interface in simulation before FPGA deployment.
 - Transition from analytic speedup estimates to measured board timings (ARM and `mcycle`).
 
 ## Core Integration Status
 
-- Accelerator is currently validated in standalone RTL simulation (`midsem_sim`).
+- Accelerator is currently validated in standalone RTL simulation (`accel_standalone`).
 - PicoRV32 is vendored and available in-repo (`picorv32/`).
 - A first CPU integration milestone is implemented in simulation via PCPI (`integration/pcpi_demo`).
 - Custom instruction path is tested with machine-code loaded directly in testbench memory.
@@ -91,18 +102,24 @@ Based on the upstream README, the core includes:
 5. Replace analytic speedup estimates with measured cycle counts (`mcycle` / ARM timing).
 6. Move to Vivado/Pynq-Z2 hardware integration after simulation sign-off.
 
-## Midsem Simulation Quick Start
+## Standalone Accelerator Quick Start
 
 Run from repository root:
 
 ```powershell
-.\midsem_sim\scripts\run_midsem_sim.ps1
+.\accel_standalone\scripts\run_midsem_sim.ps1
 ```
 
 Generated artifacts:
 
-- `midsem_sim/results/sim_output.log`
-- `midsem_sim/results/MIDSEM_RESULTS.md`
+- `accel_standalone/results/sim_output.log`
+- `accel_standalone/results/MIDSEM_RESULTS.md`
+
+Compatibility shim (old path, still supported):
+
+```powershell
+.\midsem_sim\scripts\run_midsem_sim.ps1
+```
 
 ## PCPI Integration Demo Quick Start
 
@@ -208,6 +225,25 @@ This generates estimated normal-core vs accelerator scaling tables (ideal and ov
 
 Mentor/evaluator-provided real matrices can be tested without touching baseline regression `cases.json`.
 
+Fastest live-evaluation mode (edit one JSON, run one script):
+
+1. Edit `integration/pcpi_demo/tests/live_real_input.json`
+2. Run:
+
+```powershell
+.\integration\pcpi_demo\scripts\run_pcpi_custom_cycle_compare.ps1
+```
+
+This single command automatically converts real values to Q5.10, generates firmware case data, and runs accelerator + SW no-MUL + SW MUL comparisons.
+It also writes per-variant outputs in real format:
+
+- `integration/pcpi_demo/results/custom_cases/live_eval_active_outputs_real.json`
+
+Current checked-in live profile (`live_real_input.json`) is tuned for near-50x no-MUL comparison and currently measures:
+1. `accel=673`, `sw_nomul=36246`, `sw_mul=7975`
+2. `sw_nomul/accel=53.8574x`
+3. `sw_mul/accel=11.8499x`
+
 Convert real values to Q5.10 and print preview only:
 
 ```powershell
@@ -226,6 +262,21 @@ Run one custom case from custom case file:
 .\integration\pcpi_demo\scripts\run_pcpi_custom_case.ps1 -CaseName <custom_case_name>
 ```
 
+Run one custom case across all 3 performance variants (accelerator, SW no-MUL, SW MUL):
+
+```powershell
+.\integration\pcpi_demo\scripts\run_pcpi_custom_cycle_compare.ps1 -CaseName <custom_case_name>
+```
+
+This writes per-variant logs plus a per-case cycle summary:
+
+- `integration/pcpi_demo/results/custom_cases/<case>_cycle_accel.log`
+- `integration/pcpi_demo/results/custom_cases/<case>_cycle_sw_nomul.log`
+- `integration/pcpi_demo/results/custom_cases/<case>_cycle_sw_mul.log`
+- `integration/pcpi_demo/results/custom_cases/<case>_cycle_compare_summary.md`
+- `integration/pcpi_demo/results/custom_cases/<case>_cycle_compare_summary.json`
+- `integration/pcpi_demo/results/custom_cases/<case>_outputs_real.json`
+
 Explicitly clear generated custom cases:
 
 ```powershell
@@ -241,6 +292,7 @@ python .\integration\pcpi_demo\tests\real_to_q5_10_case.py --clear-generated
    - `pynq_z2_custom_core/build/*.out`
 2. `run_cycle_compare.ps1` and `run_pcpi_professor_demo.ps1` now use a shared lock file (`integration/pcpi_demo/firmware/.firmware_flow.lock`) to avoid concurrent firmware rewrite races.
    - `run_pcpi_custom_case.ps1` also uses this lock.
+   - `run_pcpi_custom_cycle_compare.ps1` also uses this lock.
 3. After any code/script/RTL/testbench change, update both:
    - `README.md`
    - `codex_prompt.md`

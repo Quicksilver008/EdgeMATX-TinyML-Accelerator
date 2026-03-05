@@ -1,14 +1,14 @@
 # Midsem Systolic Accelerator Hardening Spec (Step 1 Freeze)
 
 Date: 2026-03-03
-Scope: `midsem_sim` standalone accelerator only (no CPU integration in this step).
+Scope: `accel_standalone` standalone accelerator only (no CPU integration in this step).
 
 ## 1. Module Under Test
 
-- Top: `midsem_sim/rtl/matrix_accel_4x4_q5_10.v`
-- Array: `midsem_sim/rtl/systolic_array_4x4_q5_10.v`
-- PE: `midsem_sim/rtl/pe_cell_q5_10.v`
-- Issue logic: `midsem_sim/rtl/issue_logic_4x4_q5_10.v`
+- Top: `accel_standalone/rtl/matrix_accel_4x4_q5_10.v`
+- Array: `accel_standalone/rtl/systolic_array_4x4_q5_10.v`
+- PE: `accel_standalone/rtl/pe_cell_q5_10.v`
+- Issue logic: `accel_standalone/rtl/issue_logic_4x4_q5_10.v`
 
 ## 2. Data Representation Contract (Frozen for Steps 1-3)
 

@@ -1,26 +1,17 @@
-# Midsem Simulation Pack
+﻿# Deprecated Path Shim (`midsem_sim`)
 
-This folder provides a self-contained pre-silicon simulation flow for the 4x4 Q5.10 systolic matrix accelerator.
+`midsem_sim` has been renamed to `accel_standalone`.
 
-## What Is Included
+Preferred command:
 
-- `rtl/`: Synthesizable Verilog modules (`pe_cell`, issue logic, 4x4 array, top-level accelerator).
-- `tb/`: Self-checking testbench with pass/fail criteria and cycle reporting.
-- `scripts/`: Automation scripts to run simulation and generate a markdown summary.
-- `results/`: Generated logs and report artifacts.
+```powershell
+.\accel_standalone\scripts\run_midsem_sim.ps1
+```
 
-## Quick Run (Windows PowerShell)
+Backward-compatible shim command (still supported):
 
 ```powershell
 .\midsem_sim\scripts\run_midsem_sim.ps1
 ```
 
-Artifacts generated:
-
-- `midsem_sim/results/sim_output.log`
-- `midsem_sim/results/MIDSEM_RESULTS.md`
-
-## Notes
-
-- This flow targets simulation evidence for mid-sem review.
-- Speedup values in the markdown are analytic estimates based on a scalar software cycle model and should be replaced by measured hardware timings in later phases.
+This shim exists to keep older docs/scripts functional while primary usage transitions to `accel_standalone`.

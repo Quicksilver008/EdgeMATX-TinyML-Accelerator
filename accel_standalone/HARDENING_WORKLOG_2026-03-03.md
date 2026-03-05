@@ -12,7 +12,7 @@
 ## Timeline
 
 ### 1) Session start
-- Confirmed current `midsem_sim` accelerator is standalone (not CPU-core integrated).
+- Confirmed current `accel_standalone` accelerator is standalone (not CPU-core integrated).
 - Confirmed baseline script/testbench passes existing two cases.
 
 ### 2) In progress
@@ -21,9 +21,9 @@
 
 ### 3) Completed in this session
 - Added hardening spec freeze doc:
-  - `midsem_sim/HARDENING_SPEC.md`
+  - `accel_standalone/HARDENING_SPEC.md`
   - Captures fixed-point arithmetic behavior, output wrap behavior, handshake contract, reset contract, and Step 1-3 acceptance criteria.
-- Reworked `midsem_sim/tb/tb_matrix_accel_4x4.v`:
+- Reworked `accel_standalone/tb/tb_matrix_accel_4x4.v`:
   - Added golden-model matrix multiply checker matching current RTL behavior.
   - Added explicit per-case log lines:
     - `TB_INFO ...`
@@ -40,13 +40,13 @@
     - post-reset recovery
     - 12 random regression cases with fixed seed
 - Updated summarizer robustness:
-  - `midsem_sim/scripts/summarize_midsem_results.py` now ignores zero-cycle entries when computing analytic speedup denominators.
+  - `accel_standalone/scripts/summarize_midsem_results.py` now ignores zero-cycle entries when computing analytic speedup denominators.
 - Re-ran full flow:
-  - command: `.\midsem_sim\scripts\run_midsem_sim.ps1`
+  - command: `.\accel_standalone\scripts\run_midsem_sim.ps1`
   - result: all 19/19 cases passed
   - updated artifacts:
-    - `midsem_sim/results/sim_output.log`
-    - `midsem_sim/results/MIDSEM_RESULTS.md`
+    - `accel_standalone/results/sim_output.log`
+    - `accel_standalone/results/MIDSEM_RESULTS.md`
 
 ## Deferred explicitly for later
 - Step 4: Saturation/rounding policy RTL changes.
