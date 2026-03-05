@@ -29,7 +29,9 @@ Build a TinyML-oriented matrix accelerator flow on RISC-V (final target: Pynq-Z2
 
 - Repository root: `TinyML-Accelerator`
 - Active working branch: `newbranch`
-- Important note: there are uncommitted local changes in docs and `integration/` content in this workspace.
+- Recent local commits on `newbranch`:
+  - `86ef180` (`Harden PCPI flows and add MUL baseline cycle comparison`)
+  - `2f451a3` (`Document MUL comparison flow and consolidate test evidence`)
 
 ## What Is Implemented And Verified
 
@@ -328,6 +330,11 @@ Note: summary and per-case expected JSON are currently ignored via `.gitignore`.
 8. For MUL-enabled software baseline, both core config and firmware ISA must align:
    - core: `ENABLE_MUL=1`
    - firmware compile arch: `rv32im`
+9. Keep handoff docs synchronized after each meaningful update:
+   - `README.md`
+   - `codex_prompt.md`
+   - `mentor_progress_update.txt`
+   - `integration/pcpi_demo/TEST_RESULTS_SUMMARY.md`
 
 ## Immediate Next Work (Do In Order)
 

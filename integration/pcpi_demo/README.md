@@ -130,6 +130,15 @@ This run reports:
 3. accelerator custom-instruction path
 4. speedups between all three.
 
+Latest verified cycle values (2026-03-05):
+
+1. Accelerator: `869`
+2. Software no-MUL (`rv32i`): `26130`
+3. Software MUL-enabled (`rv32im`): `7975`
+4. Accelerator speedup vs no-MUL software: `30.069x`
+5. Accelerator speedup vs MUL-enabled software: `9.1772x`
+6. MUL-enabled software speedup vs no-MUL software: `3.2765x`
+
 Professor-ready explainable demo cases:
 
 ```powershell
@@ -179,6 +188,10 @@ Artifacts:
 - `integration/pcpi_demo/results/pcpi_prof_demo_summary.json`
 - `integration/pcpi_demo/results/pcpi_cycle_scaling_estimate.json`
 - `integration/pcpi_demo/TEST_RESULTS_SUMMARY.md` (tracked, consolidated handoff table)
+
+For mentor/demo handoff, use this consolidated table first:
+
+- `integration/pcpi_demo/TEST_RESULTS_SUMMARY.md`
 
 Architecture contract draft for future SoC top-level:
 

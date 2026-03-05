@@ -4,6 +4,11 @@ Last updated: 2026-03-05
 
 This document consolidates the latest simulation evidence for the PCPI demo, including the new software-MUL comparison.
 
+Code snapshot context:
+
+1. Robustness + MUL comparison commit: `86ef180`
+2. Documentation consolidation commit: `2f451a3`
+
 ## 1) Latest Test Matrix
 
 | Flow | Command | Last Verified Date | Result | Key Evidence |

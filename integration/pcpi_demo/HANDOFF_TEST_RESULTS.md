@@ -45,6 +45,11 @@ From `integration/pcpi_demo/results/pcpi_handoff.log`:
 
 - `integration/pcpi_demo/results/pcpi_handoff_wave.vcd`
 
+## Cross-Reference
+
+- Consolidated multi-flow evidence table:
+  - `integration/pcpi_demo/TEST_RESULTS_SUMMARY.md`
+
 Open with:
 
 ```powershell

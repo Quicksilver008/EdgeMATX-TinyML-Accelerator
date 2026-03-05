@@ -171,6 +171,15 @@ This reports cycle counts for:
 
 and writes speedup ratios across all three.
 
+Latest verified (2026-03-05):
+
+1. `accel_cycles=869`
+2. `sw_nomul_cycles=26130` (`rv32i`, `ENABLE_MUL=0`)
+3. `sw_mul_cycles=7975` (`rv32im`, `ENABLE_MUL=1`)
+4. `sw_nomul/accel=30.069x`
+5. `sw_mul/accel=9.1772x`
+6. `sw_nomul/sw_mul=3.2765x`
+
 ## PCPI Professor Demo Cases
 
 Run from repository root:
@@ -204,6 +213,8 @@ This generates estimated normal-core vs accelerator scaling tables (ideal and ov
    - `codex_prompt.md`
 4. Consolidated tracked handoff/testing table is maintained at:
    - `integration/pcpi_demo/TEST_RESULTS_SUMMARY.md`
+5. Mentor-facing progress brief is maintained at:
+   - `mentor_progress_update.txt`
 
 Generated artifacts:
 

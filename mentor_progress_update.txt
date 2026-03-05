@@ -1,131 +1,124 @@
-TinyML-Accelerator Progress Update (Mentor Brief)
+TinyML-Accelerator Mentor Progress Update
 Date: 2026-03-05
-Branch: omar
+Team Branch: newbranch
 
-============================================================
-1) Objective (ECE / Digital + Embedded Context)
-============================================================
-- Integrate a 4x4 fixed-point matrix accelerator with a RISC-V core (PicoRV32)
-  using custom-instruction style coprocessor signaling (PCPI).
-- Prove correctness and control handshake in simulation before FPGA top-level bring-up.
-- Compare cycle cost of:
-  1) normal core software matrix multiply
-  2) custom core + accelerator instruction path
+1) Project Goal
+- Integrate a TinyML-oriented 4x4 Q5.10 matrix accelerator with PicoRV32 via PCPI custom instruction flow.
+- Prove correctness + control handshake in simulation first.
+- Compare cycle cost of accelerator path against software baselines on the same CPU family.
 
-============================================================
-2) Architecture Implemented
-============================================================
-2.1 Base CPU
-- PicoRV32 (RV32I) with ENABLE_PCPI=1 in integration testbench.
+2) Current Architecture Status
 
-2.2 Custom Extension Path
-- Wrapper module: integration/pcpi_demo/rtl/pcpi_tinyml_accel.v
-- Accelerator core: midsem_sim/rtl/matrix_accel_4x4_q5_10.v
-  (issue logic + systolic array + PE cells)
+2.1 CPU + Accelerator Integration
+- PicoRV32 integrated with PCPI wrapper:
+  - integration/pcpi_demo/rtl/pcpi_tinyml_accel.v
+- Accelerator RTL:
+  - midsem_sim/rtl/matrix_accel_4x4_q5_10.v
+- Custom instruction path is active and verified:
+  - opcode custom-0, funct3=000, funct7=0101010
+  - encoded demo word: 0x5420818b
 
-2.3 Interface Behavior
-- CPU issues custom instruction:
-  opcode custom-0, funct3=000, funct7=0101010
-- rs1 carries A base address, rs2 carries B base address.
-- Wrapper drives:
-  - pcpi_wait while accelerator is active
-  - pcpi_ready + pcpi_wr/pcpi_rd on completion
-- Wrapper reads A/B and writes C via memory sideband interface.
+2.2 Data/Control Contract Used in Simulation
+- rs1 = A matrix base pointer
+- rs2 = B matrix base pointer
+- C matrix written back by wrapper to memory buffer
+- CPU stall/resume handshake proven via:
+  - pcpi_wait, pcpi_ready, pcpi_wr, pcpi_rd
 
-2.4 Arithmetic Contract (kept invariant)
+2.3 Arithmetic Semantics (Invariant)
 - signed16 multiply
-- arithmetic shift-right by 10
+- arithmetic right shift by 10
 - signed32 accumulation
-- low16 wrap, sign-extend to 32 for memory compare
+- low16 wrap/truncate + sign-extension to 32-bit comparison
 
-============================================================
-3) Verification Status (Current)
-============================================================
-3.1 Regression (8 cases)
+3) Verification Summary (Latest)
+
+3.1 Smoke + Regression + Handoff gate
+- Script: .\integration\pcpi_demo\scripts\run_pcpi_local_check.ps1
+- Result: PASS
+- Includes:
+  - smoke-asm
+  - smoke-c
+  - regression-8case
+  - handoff
+
+3.2 8-case firmware-driven regression
 - Script: .\integration\pcpi_demo\scripts\run_pcpi_regression.ps1
 - Result: PASS (8/8)
 
-3.2 Handoff test (mixed regular + custom instructions)
+3.3 Mixed regular + custom instruction handoff
 - Script: .\integration\pcpi_demo\scripts\run_pcpi_handoff.ps1
 - Result: PASS
-- Key metrics:
-  custom_issue_count=2
-  ready_count=2
-  wr_count=2
-  handshake_ok_count=2
-  c_store_count=32
+- Metrics:
+  - custom_issue_count=2
+  - ready_count=2
+  - wr_count=2
+  - handshake_ok_count=2
+  - c_store_count=32
 
-3.3 Cycle comparison (normal core vs accelerator path)
-- Script: .\integration\pcpi_demo\scripts\run_cycle_compare.ps1
-- Measured:
-  accelerator cycles = 869
-  software cycles    = 26130
-  speedup            = 30.069x
-
-============================================================
-4) New Additions for Presentation
-============================================================
-4.1 Professor demo case set (explainable cases)
-- File: integration/pcpi_demo/tests/professor_demo_cases.json
-- Cases:
-  1) demo_identity_passthrough
-  2) demo_negative_identity
-  3) demo_zero_matrix
-  4) demo_half_scale
-  5) demo_signed_passthrough
-
-4.2 Demo runner
+3.4 Professor explainable case set
 - Script: .\integration\pcpi_demo\scripts\run_pcpi_professor_demo.ps1
-- Outputs:
-  integration/pcpi_demo/results/pcpi_prof_demo_summary.md
-  integration/pcpi_demo/results/pcpi_prof_demo_summary.json
+- Result: PASS (5/5)
 
-4.3 Scaling model (discussion support)
-- Script: integration/pcpi_demo/scripts/estimate_cycle_scaling.py
-- Output:
-  integration/pcpi_demo/results/pcpi_cycle_scaling_estimate.json
-- Provides ideal and overhead-aware scaling estimates for larger N.
+4) Cycle Comparison Update (Key Improvement)
 
-============================================================
-5) Live Demo Sequence for Professor
-============================================================
-Step 1: Show architecture source files
-- wrapper RTL, accelerator RTL, testbench files.
+4.1 What is now compared
+- Accelerator path:
+  - PicoRV32 PCPI path (ENABLE_PCPI=1, ENABLE_MUL=0)
+- Software baseline (no scalar MUL):
+  - ENABLE_PCPI=0, ENABLE_MUL=0
+  - firmware compiled as rv32i
+- Software baseline (scalar MUL enabled):
+  - ENABLE_PCPI=0, ENABLE_MUL=1
+  - firmware compiled as rv32im
 
-Step 2: Run explainable professor cases
-- .\integration\pcpi_demo\scripts\run_pcpi_professor_demo.ps1
-- Show summary markdown:
-  integration/pcpi_demo/results/pcpi_prof_demo_summary.md
+4.2 Latest measured values (identity_x_sequence)
+- Script: .\integration\pcpi_demo\scripts\run_cycle_compare.ps1
+- Accelerator cycles: 869
+- Software no-MUL cycles: 26130
+- Software MUL-enabled cycles: 7975
+- Speedup (SW no-MUL / accelerator): 30.069x
+- Speedup (SW MUL / accelerator): 9.1772x
+- SW MUL benefit (SW no-MUL / SW MUL): 3.2765x
 
-Step 3: Show robustness suite
-- .\integration\pcpi_demo\scripts\run_pcpi_regression.ps1
-- .\integration\pcpi_demo\scripts\run_pcpi_handoff.ps1
+Important technical note:
+- For a valid MUL baseline, BOTH are required:
+  1) core config ENABLE_MUL=1
+  2) firmware compile arch rv32im
 
-Step 4: Show cycle comparison
-- .\integration\pcpi_demo\scripts\run_cycle_compare.ps1
-- Highlight 30.069x speedup at 4x4 case.
+5) Robustness / Hygiene Improvements Added
+- Generated artifacts are ignored and untracked to reduce repo noise.
+- Race hardening added:
+  - run_cycle_compare.ps1 and run_pcpi_professor_demo.ps1 now serialize firmware rewrites using a shared lock file.
+- C firmware custom-op path hardened:
+  - preserves/restores ABI-critical registers around fixed custom instruction path.
+- Makefile now supports configurable ARCH/ABI for controlled rv32i vs rv32im experiments.
 
-Step 5: (Optional) Show waveform-level control proof
-- gtkwave .\integration\pcpi_demo\results\pcpi_handoff_wave.vcd
-- Signals to show:
-  pcpi_valid, pcpi_wait, pcpi_ready, pcpi_wr, pcpi_rd,
-  mem_valid, mem_addr, mem_wdata, accel_mem_valid, accel_mem_we
+6) Documentation and Handoff Discipline
+- Updated docs:
+  - README.md
+  - integration/pcpi_demo/README.md
+  - codex_prompt.md
+  - integration/pcpi_demo/TEST_RESULTS_SUMMARY.md
+- Rule followed for continuity:
+  - after meaningful code/script/RTL/testbench changes, update handoff docs in same cycle.
 
-============================================================
-6) What to Communicate Technically
-============================================================
-- This is not only arithmetic correctness; it also validates instruction-level
-  coexistence (regular + custom op) and handshake correctness.
-- Current stage is simulation-verified microarchitecture integration.
-- Next stage is FPGA top-level integration and board-level timing/resource evidence.
+7) Primary Evidence Files to Show Mentor
+- integration/pcpi_demo/TEST_RESULTS_SUMMARY.md
+- integration/pcpi_demo/results/pcpi_regression_summary.json
+- integration/pcpi_demo/results/pcpi_handoff_summary.md
+- integration/pcpi_demo/results/pcpi_cycle_compare_summary.json
+- integration/pcpi_demo/results/pcpi_prof_demo_summary.json
+- integration/pcpi_demo/HANDOFF_TEST_RESULTS.md
 
-============================================================
-7) Immediate Next Work
-============================================================
-1) Commit hygiene:
-   split script/RTL updates and docs updates.
-2) Freeze a professor-demo tag with known-good outputs.
-3) Move from simulation-only performance to board-level measurements
-   (cycles, latency, and optional power/resource correlation).
+8) Suggested Live Demo Sequence
+- 1) run local gate:
+  - .\integration\pcpi_demo\scripts\run_pcpi_local_check.ps1
+- 2) run cycle compare (3-way):
+  - .\integration\pcpi_demo\scripts\run_cycle_compare.ps1
+- 3) run professor cases:
+  - .\integration\pcpi_demo\scripts\run_pcpi_professor_demo.ps1
+- 4) show consolidated table:
+  - integration/pcpi_demo/TEST_RESULTS_SUMMARY.md
 
-End of brief.
+End of update.
