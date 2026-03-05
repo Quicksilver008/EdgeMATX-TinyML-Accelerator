@@ -282,12 +282,12 @@ Generates:
 
 1. Handoff-focused:
 ```powershell
-gtkwave .\integration\pcpi_demo\results\pcpi_handoff_wave.vcd .\user_doc\gtkwave\pcpi_handoff_signals.gtkw
+gtkwave .\integration\pcpi_demo\results\pcpi_handoff_wave.vcd .\integration\pcpi_demo\simulation\gtkwave\pcpi_handoff_signals.gtkw
 ```
 
 2. PCPI demo-focused:
 ```powershell
-gtkwave .\integration\pcpi_demo\results\pcpi_demo_wave.vcd .\user_doc\gtkwave\pcpi_demo_signals.gtkw
+gtkwave .\integration\pcpi_demo\results\pcpi_demo_wave.vcd .\integration\pcpi_demo\simulation\gtkwave\pcpi_demo_signals.gtkw
 ```
 
 If evaluator asks to add extra signals live:

@@ -55,3 +55,5 @@ Derived ratios:
 2. `integration/pcpi_demo/results/pcpi_regression_summary.json`
 3. `integration/pcpi_demo/results/pcpi_handoff_summary.md`
 4. `integration/pcpi_demo/results/pcpi_prof_demo_summary.json`
+5. `integration/pcpi_demo/docs/MIDSEM_COMPLETE_PROJECT_GUIDE.md`
+6. `integration/pcpi_demo/simulation/gtkwave/*.gtkw`

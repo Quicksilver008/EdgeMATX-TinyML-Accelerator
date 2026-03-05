@@ -187,6 +187,9 @@ Artifacts:
 - `integration/pcpi_demo/results/pcpi_prof_demo_summary.md`
 - `integration/pcpi_demo/results/pcpi_prof_demo_summary.json`
 - `integration/pcpi_demo/results/pcpi_cycle_scaling_estimate.json`
+- `integration/pcpi_demo/docs/MIDSEM_COMPLETE_PROJECT_GUIDE.md`
+- `integration/pcpi_demo/simulation/gtkwave/pcpi_demo_signals.gtkw`
+- `integration/pcpi_demo/simulation/gtkwave/pcpi_handoff_signals.gtkw`
 - `integration/pcpi_demo/TEST_RESULTS_SUMMARY.md` (tracked, consolidated handoff table)
 
 For mentor/demo handoff, use this consolidated table first:
@@ -221,6 +224,12 @@ To inspect waveform:
 
 ```powershell
 gtkwave .\integration\pcpi_demo\results\pcpi_handoff_wave.vcd
+```
+
+Or load the pre-saved handoff signal view:
+
+```powershell
+gtkwave .\integration\pcpi_demo\results\pcpi_handoff_wave.vcd .\integration\pcpi_demo\simulation\gtkwave\pcpi_handoff_signals.gtkw
 ```
 
 Recommended signals to add in GTKWave:

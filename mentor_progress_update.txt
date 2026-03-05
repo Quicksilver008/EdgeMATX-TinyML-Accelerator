@@ -100,6 +100,8 @@ Important technical note:
   - integration/pcpi_demo/README.md
   - codex_prompt.md
   - integration/pcpi_demo/TEST_RESULTS_SUMMARY.md
+  - integration/pcpi_demo/docs/MIDSEM_COMPLETE_PROJECT_GUIDE.md
+  - integration/pcpi_demo/simulation/gtkwave/*.gtkw
 - Rule followed for continuity:
   - after meaningful code/script/RTL/testbench changes, update handoff docs in same cycle.
 

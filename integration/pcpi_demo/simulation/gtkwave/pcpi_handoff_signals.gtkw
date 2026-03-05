@@ -2,7 +2,7 @@
 [*] GTKWave Analyzer v3.3.118
 [dumpfile] "integration/pcpi_demo/results/pcpi_handoff_wave.vcd"
 [dumpfile_mtime] "0"
-[savefile] "user_doc/gtkwave/pcpi_handoff_signals.gtkw"
+[savefile] "integration/pcpi_demo/simulation/gtkwave/pcpi_handoff_signals.gtkw"
 [timestart] 0
 [size] 1920 1030
 [pos] -1 -1

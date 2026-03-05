@@ -28,10 +28,10 @@ Build a TinyML-oriented matrix accelerator flow on RISC-V (final target: Pynq-Z2
 ## Current Repo Snapshot
 
 - Repository root: `TinyML-Accelerator`
-- Active working branch: `newbranch`
-- Recent local commits on `newbranch`:
-  - `86ef180` (`Harden PCPI flows and add MUL baseline cycle comparison`)
-  - `2f451a3` (`Document MUL comparison flow and consolidate test evidence`)
+- Active working branch: `main`
+- Recent local commits on `main`:
+  - `2f67862` (`Add midsem guide and GTKWave setups; refresh firmware artifacts`)
+  - `cdc5f48` (`Refresh handoff and mentor docs with latest validated results`)
 
 ## What Is Implemented And Verified
 
@@ -336,7 +336,10 @@ Note: summary and per-case expected JSON are currently ignored via `.gitignore`.
    - `mentor_progress_update.txt`
    - `integration/pcpi_demo/TEST_RESULTS_SUMMARY.md`
 10. Full beginner-friendly operation guide:
-    - `user_doc/MIDSEM_COMPLETE_PROJECT_GUIDE.md`
+    - `integration/pcpi_demo/docs/MIDSEM_COMPLETE_PROJECT_GUIDE.md`
+11. Saved GTKWave sessions for repeatable demos are stored at:
+    - `integration/pcpi_demo/simulation/gtkwave/pcpi_demo_signals.gtkw`
+    - `integration/pcpi_demo/simulation/gtkwave/pcpi_handoff_signals.gtkw`
 
 ## Immediate Next Work (Do In Order)
 
