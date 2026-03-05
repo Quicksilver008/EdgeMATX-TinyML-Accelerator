@@ -200,6 +200,34 @@ python .\integration\pcpi_demo\scripts\estimate_cycle_scaling.py --sizes 4,8,16,
 
 This generates estimated normal-core vs accelerator scaling tables (ideal and overhead-aware) in JSON form.
 
+## Custom Real-Input Case Flow
+
+Mentor/evaluator-provided real matrices can be tested without touching baseline regression `cases.json`.
+
+Convert real values to Q5.10 and print preview only:
+
+```powershell
+python .\integration\pcpi_demo\tests\real_to_q5_10_case.py --input-json .\integration\pcpi_demo\tests\sample_real_input.json
+```
+
+Convert and append timestamped custom case into isolated custom file:
+
+```powershell
+python .\integration\pcpi_demo\tests\real_to_q5_10_case.py --input-json .\integration\pcpi_demo\tests\sample_real_input.json --append-custom
+```
+
+Run one custom case from custom case file:
+
+```powershell
+.\integration\pcpi_demo\scripts\run_pcpi_custom_case.ps1 -CaseName <custom_case_name>
+```
+
+Explicitly clear generated custom cases:
+
+```powershell
+python .\integration\pcpi_demo\tests\real_to_q5_10_case.py --clear-generated
+```
+
 ## Repo Hygiene + Handoff Discipline
 
 1. Generated outputs are intentionally ignored (do not commit):

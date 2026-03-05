@@ -1,6 +1,6 @@
 TinyML-Accelerator Mentor Progress Update
 Date: 2026-03-05
-Team Branch: newbranch
+Team Branch: main
 
 1) Project Goal
 - Integrate a TinyML-oriented 4x4 Q5.10 matrix accelerator with PicoRV32 via PCPI custom instruction flow.
@@ -60,6 +60,18 @@ Team Branch: newbranch
 - Script: .\integration\pcpi_demo\scripts\run_pcpi_professor_demo.ps1
 - Result: PASS (5/5)
 
+3.5 Evaluator real-input isolated custom-case flow
+- Converter script:
+  - .\integration\pcpi_demo\tests\real_to_q5_10_case.py
+- Single-case runner:
+  - .\integration\pcpi_demo\scripts\run_pcpi_custom_case.ps1
+- Result: PASS
+- Verified path:
+  - convert sample real matrices -> append custom case -> run custom case -> explicit cleanup
+- Isolation guarantee:
+  - baseline regression vectors remain in `tests/cases.json`
+  - evaluator custom vectors are isolated in `tests/custom_cases.json`
+
 4) Cycle Comparison Update (Key Improvement)
 
 4.1 What is now compared
@@ -89,10 +101,11 @@ Important technical note:
 5) Robustness / Hygiene Improvements Added
 - Generated artifacts are ignored and untracked to reduce repo noise.
 - Race hardening added:
-  - run_cycle_compare.ps1 and run_pcpi_professor_demo.ps1 now serialize firmware rewrites using a shared lock file.
+  - run_cycle_compare.ps1, run_pcpi_professor_demo.ps1, and run_pcpi_custom_case.ps1 now serialize firmware rewrites using a shared lock file.
 - C firmware custom-op path hardened:
   - preserves/restores ABI-critical registers around fixed custom instruction path.
 - Makefile now supports configurable ARCH/ABI for controlled rv32i vs rv32im experiments.
+- Added strict real->Q5.10 conversion utility with signed16 bounds checking and explicit generated-case cleanup mode.
 
 6) Documentation and Handoff Discipline
 - Updated docs:
@@ -102,6 +115,7 @@ Important technical note:
   - integration/pcpi_demo/TEST_RESULTS_SUMMARY.md
   - integration/pcpi_demo/docs/MIDSEM_COMPLETE_PROJECT_GUIDE.md
   - integration/pcpi_demo/simulation/gtkwave/*.gtkw
+  - integration/pcpi_demo/tests/custom_cases.json
 - Rule followed for continuity:
   - after meaningful code/script/RTL/testbench changes, update handoff docs in same cycle.
 
@@ -112,6 +126,7 @@ Important technical note:
 - integration/pcpi_demo/results/pcpi_cycle_compare_summary.json
 - integration/pcpi_demo/results/pcpi_prof_demo_summary.json
 - integration/pcpi_demo/HANDOFF_TEST_RESULTS.md
+- integration/pcpi_demo/tests/custom_cases.json
 
 8) Suggested Live Demo Sequence
 - 1) run local gate:

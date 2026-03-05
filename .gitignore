@@ -16,6 +16,8 @@ integration/pcpi_demo/results/pcpi_prof_demo_summary.md
 integration/pcpi_demo/results/pcpi_prof_demo_summary.json
 integration/pcpi_demo/results/prof_demo_cases/*.log
 integration/pcpi_demo/results/prof_demo_cases/*.expected.json
+integration/pcpi_demo/results/custom_cases/*.log
+integration/pcpi_demo/results/custom_cases/*.expected.json
 integration/pcpi_demo/firmware/*.bin
 integration/pcpi_demo/firmware/*.elf
 integration/pcpi_demo/firmware/*.map

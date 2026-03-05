@@ -157,6 +157,36 @@ One-command local checker (smoke asm + smoke c + regression + handoff):
 .\integration\pcpi_demo\scripts\run_pcpi_local_check.ps1
 ```
 
+Custom real-input case flow (isolated from baseline `tests/cases.json`):
+
+1. Convert real matrices to Q5.10 preview:
+
+```powershell
+python .\integration\pcpi_demo\tests\real_to_q5_10_case.py --input-json .\integration\pcpi_demo\tests\sample_real_input.json
+```
+
+2. Convert and append timestamped custom case:
+
+```powershell
+python .\integration\pcpi_demo\tests\real_to_q5_10_case.py --input-json .\integration\pcpi_demo\tests\sample_real_input.json --append-custom
+```
+
+3. Run one custom case:
+
+```powershell
+.\integration\pcpi_demo\scripts\run_pcpi_custom_case.ps1 -CaseName <custom_case_name>
+```
+
+4. Optional explicit cleanup of generated custom cases:
+
+```powershell
+python .\integration\pcpi_demo\tests\real_to_q5_10_case.py --clear-generated
+```
+
+Default isolated custom file:
+
+- `integration/pcpi_demo/tests/custom_cases.json`
+
 Firmware flow notes:
 
 - If `riscv64-unknown-elf-gcc` is available, the script rebuilds firmware from:
@@ -187,6 +217,8 @@ Artifacts:
 - `integration/pcpi_demo/results/pcpi_prof_demo_summary.md`
 - `integration/pcpi_demo/results/pcpi_prof_demo_summary.json`
 - `integration/pcpi_demo/results/pcpi_cycle_scaling_estimate.json`
+- `integration/pcpi_demo/results/custom_cases/*.log`
+- `integration/pcpi_demo/results/custom_cases/*.expected.json`
 - `integration/pcpi_demo/docs/MIDSEM_COMPLETE_PROJECT_GUIDE.md`
 - `integration/pcpi_demo/simulation/gtkwave/pcpi_demo_signals.gtkw`
 - `integration/pcpi_demo/simulation/gtkwave/pcpi_handoff_signals.gtkw`
@@ -257,6 +289,12 @@ Recommended signals to add in GTKWave:
 - `a_q5_10`: 16 signed values (decimal or hex string)
 - `b_q5_10`: 16 signed values (decimal or hex string)
 - `notes`: optional description
+
+Isolated custom case file (`integration/pcpi_demo/tests/custom_cases.json`) uses the same fields and may include:
+
+- `meta.generated_by`: `real_to_q5_10`
+- `meta.created_at_utc`
+- `meta.input_source`
 
 All regression checks use RTL-exact arithmetic:
 

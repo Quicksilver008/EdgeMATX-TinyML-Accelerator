@@ -19,6 +19,7 @@ Code snapshot context:
 | Handoff mixed-instruction test | `.\integration\pcpi_demo\scripts\run_pcpi_handoff.ps1` | 2026-03-05 | PASS | `custom_issue=2 ready=2 wr=2 handshake_ok=2 c_store=32` |
 | Professor demo suite | `.\integration\pcpi_demo\scripts\run_pcpi_professor_demo.ps1` | 2026-03-05 | PASS (5/5) | `pcpi_prof_demo_summary.json` |
 | Cycle comparison (accelerator vs SW no-MUL vs SW MUL) | `.\integration\pcpi_demo\scripts\run_cycle_compare.ps1` | 2026-03-05 | PASS | `pcpi_cycle_compare_summary.json` |
+| Custom real-input isolated case flow | `python .\integration\pcpi_demo\tests\real_to_q5_10_case.py --input-json .\integration\pcpi_demo\tests\sample_real_input.json --append-custom --name custom_demo_identity` then `.\integration\pcpi_demo\scripts\run_pcpi_custom_case.ps1 -CaseName custom_demo_identity` | 2026-03-05 | PASS | custom case conversion + isolated run PASS (`TB_CYCLES=869`) |
 | One-command gate | `.\integration\pcpi_demo\scripts\run_pcpi_local_check.ps1` | 2026-03-05 | PASS | `smoke-asm + smoke-c + regression + handoff` all PASS |
 
 ## 2) Cycle Comparison Results (Same Matrix Case)
@@ -48,6 +49,10 @@ Derived ratios:
 5. Arithmetic semantics remain unchanged across all paths: RTL-exact Q5.10 wrap behavior.
 6. `run_cycle_compare.ps1` and `run_pcpi_professor_demo.ps1` both rewrite firmware inputs; they are serialized via a shared lock file (`integration/pcpi_demo/firmware/.firmware_flow.lock`) to avoid race corruption.
 7. Generated evidence under `integration/pcpi_demo/results/` is intentionally ignored by git; this tracked file acts as the stable handoff summary.
+8. Evaluator real-value tests can now be isolated from baseline regression vectors:
+   - baseline remains in `integration/pcpi_demo/tests/cases.json`
+   - custom generated entries are stored in `integration/pcpi_demo/tests/custom_cases.json`
+   - explicit cleanup is available via `--clear-generated`
 
 ## 4) Source Artifacts
 
@@ -57,3 +62,5 @@ Derived ratios:
 4. `integration/pcpi_demo/results/pcpi_prof_demo_summary.json`
 5. `integration/pcpi_demo/docs/MIDSEM_COMPLETE_PROJECT_GUIDE.md`
 6. `integration/pcpi_demo/simulation/gtkwave/*.gtkw`
+7. `integration/pcpi_demo/tests/custom_cases.json`
+8. `integration/pcpi_demo/tests/real_to_q5_10_case.py`

@@ -201,11 +201,29 @@ Added:
 ### M) Cleanup + robustness hardening (new)
 
 Added/updated:
-1. `.gitignore` now ignores generated cycle/prof-demo outputs and `pynq_z2_custom_core/build/*.out`.
+1. `.gitignore` now ignores generated cycle/prof-demo/custom-case outputs and `pynq_z2_custom_core/build/*.out`.
 2. `integration/pcpi_demo/firmware/firmware_c.c` now preserves/restores ABI-critical registers around the fixed custom instruction encoding path.
 3. `integration/pcpi_demo/firmware/Makefile` now includes `-msmall-data-limit=0` and configurable `ARCH`/`ABI` to support controlled `rv32i` vs `rv32im` baseline comparisons.
 4. `integration/pcpi_demo/scripts/run_cycle_compare.ps1` and `integration/pcpi_demo/scripts/run_pcpi_professor_demo.ps1` now use a shared lock file (`integration/pcpi_demo/firmware/.firmware_flow.lock`) to serialize firmware-rewrite flows.
 5. Added tracked consolidated evidence file: `integration/pcpi_demo/TEST_RESULTS_SUMMARY.md`.
+
+### N) Isolated evaluator custom real-input flow (new)
+
+Added:
+1. Isolated custom case store: `integration/pcpi_demo/tests/custom_cases.json`
+2. Real-to-Q5.10 converter: `integration/pcpi_demo/tests/real_to_q5_10_case.py`
+3. Sample real input template: `integration/pcpi_demo/tests/sample_real_input.json`
+4. Single-case runner for isolated custom file: `integration/pcpi_demo/scripts/run_pcpi_custom_case.ps1`
+
+What it enables:
+1. Accept mentor/evaluator real-valued matrices (`a_real`/`b_real` or `a_real_4x4`/`b_real_4x4`).
+2. Convert using `round(real * 1024)` with strict signed16 range checking.
+3. Optionally append timestamped or named generated case entries into isolated custom file.
+4. Explicit cleanup mode to remove generated custom entries without touching baseline `tests/cases.json`.
+
+Non-disturbance guarantee:
+1. `run_pcpi_regression.ps1` still consumes only `integration/pcpi_demo/tests/cases.json`.
+2. Cycle-compare and professor-demo flows are unchanged.
 
 ## Toolchain Status
 
@@ -294,6 +312,22 @@ From repo root (`TinyML-Accelerator`):
 python .\integration\pcpi_demo\scripts\estimate_cycle_scaling.py --sizes 4,8,16,32,64
 ```
 
+2e. Convert evaluator real matrices to Q5.10 preview (isolated custom flow):
+```powershell
+python .\integration\pcpi_demo\tests\real_to_q5_10_case.py --input-json .\integration\pcpi_demo\tests\sample_real_input.json
+```
+
+2f. Append custom case then run it (isolated file):
+```powershell
+python .\integration\pcpi_demo\tests\real_to_q5_10_case.py --input-json .\integration\pcpi_demo\tests\sample_real_input.json --append-custom
+.\integration\pcpi_demo\scripts\run_pcpi_custom_case.ps1 -CaseName <custom_case_name>
+```
+
+2g. Explicit cleanup of generated custom cases:
+```powershell
+python .\integration\pcpi_demo\tests\real_to_q5_10_case.py --clear-generated
+```
+
 3. Generate one specific firmware case manually:
 ```powershell
 python .\integration\pcpi_demo\tests\gen_case_firmware.py --cases .\integration\pcpi_demo\tests\cases.json --case identity_x_sequence --firmware-out .\integration\pcpi_demo\firmware\firmware.S --meta-out .\integration\pcpi_demo\results\cases\identity_x_sequence.expected.json
@@ -315,6 +349,8 @@ $fwDirWin=(Resolve-Path .\integration\pcpi_demo\firmware).Path; $fwDirWsl="/mnt/
 2. `integration/pcpi_demo/results/pcpi_regression_summary.md`
 3. `integration/pcpi_demo/results/pcpi_regression_summary.json`
 4. `integration/pcpi_demo/TEST_RESULTS_SUMMARY.md` (tracked consolidated table)
+5. `integration/pcpi_demo/results/custom_cases/*.log`
+6. `integration/pcpi_demo/results/custom_cases/*.expected.json`
 
 Note: summary and per-case expected JSON are currently ignored via `.gitignore`.
 
@@ -340,6 +376,11 @@ Note: summary and per-case expected JSON are currently ignored via `.gitignore`.
 11. Saved GTKWave sessions for repeatable demos are stored at:
     - `integration/pcpi_demo/simulation/gtkwave/pcpi_demo_signals.gtkw`
     - `integration/pcpi_demo/simulation/gtkwave/pcpi_handoff_signals.gtkw`
+12. Evaluator custom real-input flow is isolated:
+    - baseline vectors: `integration/pcpi_demo/tests/cases.json`
+    - custom generated vectors: `integration/pcpi_demo/tests/custom_cases.json`
+    - cleanup command: `python .\integration\pcpi_demo\tests\real_to_q5_10_case.py --clear-generated`
+13. `run_pcpi_custom_case.ps1` rewrites firmware inputs and uses the shared firmware flow lock; do not run concurrent firmware-rewrite scripts without lock discipline.
 
 ## Immediate Next Work (Do In Order)
 
@@ -384,6 +425,12 @@ Validated on 2026-03-05:
 6. One-command local check:
    - command: `.\integration\pcpi_demo\scripts\run_pcpi_local_check.ps1`
    - result: PASS (`smoke-asm`, `smoke-c`, `regression-8case`, `handoff`)
+7. Isolated evaluator custom flow:
+   - command:
+     - `python .\integration\pcpi_demo\tests\real_to_q5_10_case.py --input-json .\integration\pcpi_demo\tests\sample_real_input.json --append-custom --name custom_demo_identity`
+     - `.\integration\pcpi_demo\scripts\run_pcpi_custom_case.ps1 -CaseName custom_demo_identity`
+     - `python .\integration\pcpi_demo\tests\real_to_q5_10_case.py --clear-generated`
+   - result: PASS (conversion + custom case run + explicit cleanup)
 
 ## Not In Scope Yet
 

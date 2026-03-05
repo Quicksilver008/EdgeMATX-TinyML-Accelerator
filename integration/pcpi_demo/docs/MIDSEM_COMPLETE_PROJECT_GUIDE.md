@@ -200,9 +200,40 @@ Critical nuance:
 
 ## 8) Evaluator Custom Input Workflow (Most Important Section)
 
-You have two safe live methods:
+You have three safe live methods:
 
-### Method A (recommended): Add evaluator case into `cases.json`
+### Method A (recommended): Isolated custom real-input flow (no disturbance to baseline)
+
+1. Real input template:
+   - `integration/pcpi_demo/tests/sample_real_input.json`
+2. Isolated custom case store:
+   - `integration/pcpi_demo/tests/custom_cases.json`
+
+Convert evaluator real values to Q5.10 and preview:
+
+```powershell
+python .\integration\pcpi_demo\tests\real_to_q5_10_case.py --input-json .\integration\pcpi_demo\tests\sample_real_input.json
+```
+
+Append generated case (timestamped name by default) to custom case file:
+
+```powershell
+python .\integration\pcpi_demo\tests\real_to_q5_10_case.py --input-json .\integration\pcpi_demo\tests\sample_real_input.json --append-custom
+```
+
+Run one custom case:
+
+```powershell
+.\integration\pcpi_demo\scripts\run_pcpi_custom_case.ps1 -CaseName <custom_case_name>
+```
+
+Optional explicit cleanup of generated custom cases:
+
+```powershell
+python .\integration\pcpi_demo\tests\real_to_q5_10_case.py --clear-generated
+```
+
+### Method B: Add evaluator case into baseline `cases.json`
 
 File:
 
@@ -221,14 +252,14 @@ Then run full regression:
 .\integration\pcpi_demo\scripts\run_pcpi_regression.ps1
 ```
 
-If evaluator wants only one custom case quickly:
+If evaluator wants only one baseline case quickly:
 
 ```powershell
 python .\integration\pcpi_demo\tests\gen_case_firmware.py --cases .\integration\pcpi_demo\tests\cases.json --case <your_case_name> --firmware-out .\integration\pcpi_demo\firmware\firmware.S --meta-out .\integration\pcpi_demo\results\cases\<your_case_name>.expected.json
 .\integration\pcpi_demo\scripts\run_pcpi_demo.ps1
 ```
 
-### Method B: Direct quick edit of `firmware.S`
+### Method C: Direct quick edit of `firmware.S`
 
 Edit `a_init` and `b_init` in:
 
@@ -240,14 +271,15 @@ Then run:
 .\integration\pcpi_demo\scripts\run_pcpi_demo.ps1
 ```
 
-Method A is better for reproducibility because it generates expected metadata too.
+Method A is recommended during evaluator interaction because it keeps baseline regression vectors untouched.
 
 ## 9) Converting Evaluator Values to Q5.10
 
 If evaluator gives decimal real numbers:
 
 1. Q5.10 integer = `round(real_value * 1024)`
-2. store signed integer in `cases.json`
+2. keep converted value in signed16 range (`-32768` to `32767`)
+3. use `real_to_q5_10_case.py` to automate conversion and validation
 
 Examples:
 
