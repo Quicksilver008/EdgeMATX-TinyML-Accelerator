@@ -163,7 +163,13 @@ Run from repository root:
 .\integration\pcpi_demo\scripts\run_cycle_compare.ps1
 ```
 
-This reports cycle counts for software-only matmul vs custom-instruction accelerator matmul, then writes a speedup summary.
+This reports cycle counts for:
+
+1. software baseline without scalar MUL (`rv32i`, `ENABLE_MUL=0`)
+2. software baseline with scalar MUL (`rv32im`, `ENABLE_MUL=1`)
+3. custom-instruction accelerator path
+
+and writes speedup ratios across all three.
 
 ## PCPI Professor Demo Cases
 
@@ -184,6 +190,20 @@ python .\integration\pcpi_demo\scripts\estimate_cycle_scaling.py --sizes 4,8,16,
 ```
 
 This generates estimated normal-core vs accelerator scaling tables (ideal and overhead-aware) in JSON form.
+
+## Repo Hygiene + Handoff Discipline
+
+1. Generated outputs are intentionally ignored (do not commit):
+   - `integration/pcpi_demo/results/pcpi_cycle_*`
+   - `integration/pcpi_demo/results/pcpi_prof_demo_*`
+   - `integration/pcpi_demo/results/prof_demo_cases/*`
+   - `pynq_z2_custom_core/build/*.out`
+2. `run_cycle_compare.ps1` and `run_pcpi_professor_demo.ps1` now use a shared lock file (`integration/pcpi_demo/firmware/.firmware_flow.lock`) to avoid concurrent firmware rewrite races.
+3. After any code/script/RTL/testbench change, update both:
+   - `README.md`
+   - `codex_prompt.md`
+4. Consolidated tracked handoff/testing table is maintained at:
+   - `integration/pcpi_demo/TEST_RESULTS_SUMMARY.md`
 
 Generated artifacts:
 

@@ -117,11 +117,18 @@ Handoff/handshake validation (mixed regular + custom instructions):
 .\integration\pcpi_demo\scripts\run_pcpi_handoff.ps1
 ```
 
-Cycle comparison (software baseline vs accelerator custom instruction):
+Cycle comparison (software no-MUL baseline vs software MUL baseline vs accelerator):
 
 ```powershell
 .\integration\pcpi_demo\scripts\run_cycle_compare.ps1
 ```
+
+This run reports:
+
+1. software no-MUL (`rv32i`, `ENABLE_MUL=0`)
+2. software MUL-enabled (`rv32im`, `ENABLE_MUL=1`)
+3. accelerator custom-instruction path
+4. speedups between all three.
 
 Professor-ready explainable demo cases:
 
@@ -164,12 +171,14 @@ Artifacts:
 - `integration/pcpi_demo/results/pcpi_handoff_wave.vcd`
 - `integration/pcpi_demo/results/pcpi_handoff_summary.md`
 - `integration/pcpi_demo/results/pcpi_cycle_accel.log`
-- `integration/pcpi_demo/results/pcpi_cycle_sw.log`
+- `integration/pcpi_demo/results/pcpi_cycle_sw_nomul.log`
+- `integration/pcpi_demo/results/pcpi_cycle_sw_mul.log`
 - `integration/pcpi_demo/results/pcpi_cycle_compare_summary.md`
 - `integration/pcpi_demo/results/pcpi_cycle_compare_summary.json`
 - `integration/pcpi_demo/results/pcpi_prof_demo_summary.md`
 - `integration/pcpi_demo/results/pcpi_prof_demo_summary.json`
 - `integration/pcpi_demo/results/pcpi_cycle_scaling_estimate.json`
+- `integration/pcpi_demo/TEST_RESULTS_SUMMARY.md` (tracked, consolidated handoff table)
 
 Architecture contract draft for future SoC top-level:
 

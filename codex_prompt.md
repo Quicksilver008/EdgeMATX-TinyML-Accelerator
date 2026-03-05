@@ -28,7 +28,7 @@ Build a TinyML-oriented matrix accelerator flow on RISC-V (final target: Pynq-Z2
 ## Current Repo Snapshot
 
 - Repository root: `TinyML-Accelerator`
-- Active working branch: `omar`
+- Active working branch: `newbranch`
 - Important note: there are uncommitted local changes in docs and `integration/` content in this workspace.
 
 ## What Is Implemented And Verified
@@ -150,20 +150,24 @@ Added:
 Added:
 1. Software baseline firmware: `integration/pcpi_demo/firmware/firmware_sw_matmul.c`
 2. Software-only baseline testbench: `integration/pcpi_demo/tb/tb_picorv32_sw_matmul.v`
-3. Unified comparison runner: `integration/pcpi_demo/scripts/run_cycle_compare.ps1`
-4. Cycle marker in accelerator TB: `TB_CYCLES matmul_to_sentinel_cycles=...`
+3. Software MUL-enabled baseline testbench: `integration/pcpi_demo/tb/tb_picorv32_sw_matmul_mul.v`
+4. Unified comparison runner: `integration/pcpi_demo/scripts/run_cycle_compare.ps1`
+5. Cycle marker in accelerator TB: `TB_CYCLES matmul_to_sentinel_cycles=...`
 
 What it does:
 1. Generates accelerator firmware for `identity_x_sequence`.
-2. Runs accelerator path and software path.
-3. Extracts cycle counts from both logs.
-4. Emits speedup summary markdown/json.
+2. Runs accelerator path, software no-MUL path (`rv32i`), and software MUL-enabled path (`rv32im`).
+3. Extracts cycle counts from all logs.
+4. Emits speedup summary markdown/json across all three baselines.
 
 Latest observed run (2026-03-05):
 1. Accelerator cycles: `869`
-2. Software cycles: `26130`
-3. Speedup (`software / accelerator`): `30.069x`
-4. Summary files:
+2. Software cycles (no-MUL): `26130`
+3. Software cycles (MUL-enabled): `7975`
+4. Speedup (`sw_no_mul / accelerator`): `30.069x`
+5. Speedup (`sw_mul / accelerator`): `9.1772x`
+6. MUL benefit (`sw_no_mul / sw_mul`): `3.2765x`
+7. Summary files:
    - `integration/pcpi_demo/results/pcpi_cycle_compare_summary.md`
    - `integration/pcpi_demo/results/pcpi_cycle_compare_summary.json`
 
@@ -191,6 +195,15 @@ Added:
 3. Supports:
    - ideal O(N^3) scaling comparison
    - overhead-aware scaling knobs for tiling/control/contention discussion
+
+### M) Cleanup + robustness hardening (new)
+
+Added/updated:
+1. `.gitignore` now ignores generated cycle/prof-demo outputs and `pynq_z2_custom_core/build/*.out`.
+2. `integration/pcpi_demo/firmware/firmware_c.c` now preserves/restores ABI-critical registers around the fixed custom instruction encoding path.
+3. `integration/pcpi_demo/firmware/Makefile` now includes `-msmall-data-limit=0` and configurable `ARCH`/`ABI` to support controlled `rv32i` vs `rv32im` baseline comparisons.
+4. `integration/pcpi_demo/scripts/run_cycle_compare.ps1` and `integration/pcpi_demo/scripts/run_pcpi_professor_demo.ps1` now use a shared lock file (`integration/pcpi_demo/firmware/.firmware_flow.lock`) to serialize firmware-rewrite flows.
+5. Added tracked consolidated evidence file: `integration/pcpi_demo/TEST_RESULTS_SUMMARY.md`.
 
 ## Toolchain Status
 
@@ -289,11 +302,17 @@ python .\integration\pcpi_demo\tests\gen_case_firmware.py --cases .\integration\
 $fwDirWin=(Resolve-Path .\integration\pcpi_demo\firmware).Path; $fwDirWsl="/mnt/$($fwDirWin.Substring(0,1).ToLower())$($fwDirWin.Substring(2).Replace('\','/'))"; wsl bash -lc "cd '$fwDirWsl' && make clean all PYTHON=python3"
 ```
 
+5. Rebuild firmware in WSL with M extension enabled (for MUL baseline experiments):
+```powershell
+$fwDirWin=(Resolve-Path .\integration\pcpi_demo\firmware).Path; $fwDirWsl="/mnt/$($fwDirWin.Substring(0,1).ToLower())$($fwDirWin.Substring(2).Replace('\','/'))"; wsl bash -lc "cd '$fwDirWsl' && make clean all PYTHON=python3 FIRMWARE_SRC=firmware_sw_matmul.c ARCH=rv32im WORDS=1024"
+```
+
 ## Generated Evidence Files
 
 1. `integration/pcpi_demo/results/cases/*.log`
 2. `integration/pcpi_demo/results/pcpi_regression_summary.md`
 3. `integration/pcpi_demo/results/pcpi_regression_summary.json`
+4. `integration/pcpi_demo/TEST_RESULTS_SUMMARY.md` (tracked consolidated table)
 
 Note: summary and per-case expected JSON are currently ignored via `.gitignore`.
 
@@ -303,6 +322,12 @@ Note: summary and per-case expected JSON are currently ignored via `.gitignore`.
 2. After regression, firmware ends on the last case unless explicitly reset.
 3. In this workspace, firmware was reset to `identity_x_sequence` after regression for predictable smoke behavior.
 4. TB now prints `TB_INFO case=...` using optional plusarg; functional behavior unchanged.
+5. `run_cycle_compare.ps1` and `run_pcpi_professor_demo.ps1` both rewrite firmware inputs; they are now serialized via lock file to avoid races if launched concurrently.
+6. Generated evidence artifacts should stay untracked; keep repository commits source-only unless intentionally archiving evidence.
+7. Mandatory handoff discipline: after any code/script/RTL/testbench change, update both `README.md` and `codex_prompt.md`.
+8. For MUL-enabled software baseline, both core config and firmware ISA must align:
+   - core: `ENABLE_MUL=1`
+   - firmware compile arch: `rv32im`
 
 ## Immediate Next Work (Do In Order)
 
@@ -333,7 +358,8 @@ Validated on 2026-03-05:
 3. Cycle comparison:
    - command: `.\integration\pcpi_demo\scripts\run_cycle_compare.ps1`
    - result: PASS
-   - measured: `accel_cycles=869`, `sw_cycles=26130`, `speedup=30.069x`
+   - measured: `accel_cycles=869`, `sw_nomul_cycles=26130`, `sw_mul_cycles=7975`
+   - ratios: `sw_nomul/accel=30.069x`, `sw_mul/accel=9.1772x`, `sw_nomul/sw_mul=3.2765x`
 4. Cycle scaling estimator:
    - command: `python .\integration\pcpi_demo\scripts\estimate_cycle_scaling.py --sizes 4,8,16,32,64`
    - output generated: `integration/pcpi_demo/results/pcpi_cycle_scaling_estimate.json`
@@ -343,6 +369,9 @@ Validated on 2026-03-05:
    - summary files:
      - `integration/pcpi_demo/results/pcpi_prof_demo_summary.md`
      - `integration/pcpi_demo/results/pcpi_prof_demo_summary.json`
+6. One-command local check:
+   - command: `.\integration\pcpi_demo\scripts\run_pcpi_local_check.ps1`
+   - result: PASS (`smoke-asm`, `smoke-c`, `regression-8case`, `handoff`)
 
 ## Not In Scope Yet
 
