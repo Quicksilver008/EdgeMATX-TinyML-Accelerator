@@ -52,6 +52,25 @@ Custom instruction encoding used:
 3. funct7: `0101010`
 4. machine word used in firmware: `0x5420818b`
 
+Why this opcode is fixed in this project:
+
+1. The PCPI wrapper RTL decodes one exact instruction pattern (opcode/funct3/funct7).
+2. Standard C compiler optimization does not auto-convert nested matmul loops into your custom instruction.
+3. So firmware must explicitly emit this machine word when offload is intended.
+
+How custom instruction can look in assembly:
+
+1. Raw word form (used here, always works):
+```asm
+.word 0x5420818b
+```
+2. Equivalent conceptual R-type layout:
+```asm
+# funct7=0101010, rs2=x2, rs1=x1, funct3=000, rd=x3, opcode=0001011
+custom_matmul x3, x1, x2
+```
+3. Some toolchains can express it with `.insn`, but support is assembler-dependent. Raw `.word` is the robust portable choice in this flow.
+
 ## 3) How Accelerator Integration Works
 
 ### 3.1 Instruction-level flow
@@ -375,13 +394,164 @@ If evaluator asks to add extra signals live:
 
 ## 13) Key Files You Should Know by Heart
 
-1. `integration/pcpi_demo/rtl/pcpi_tinyml_accel.v`
-2. `integration/pcpi_demo/tb/tb_picorv32_pcpi_tinyml.v`
-3. `integration/pcpi_demo/tb/tb_picorv32_pcpi_handoff.v`
-4. `integration/pcpi_demo/scripts/run_pcpi_local_check.ps1`
-5. `integration/pcpi_demo/scripts/run_cycle_compare.ps1`
-6. `integration/pcpi_demo/tests/cases.json`
-7. `integration/pcpi_demo/TEST_RESULTS_SUMMARY.md`
+This section explains the function of each core file and what the important code in that file is doing.
+
+### 13.1 `integration/pcpi_demo/rtl/pcpi_tinyml_accel.v`
+
+Function:
+1. This is the hardware bridge between PicoRV32 PCPI port and your matrix accelerator RTL.
+
+Important code behavior:
+1. Instruction decode checks the fixed custom encoding match.
+2. State machine sequence controls full transaction:
+   - `S_IDLE -> S_LOAD_A -> S_LOAD_B -> S_KICK -> S_WAIT_ACC -> S_STORE_C -> S_RESP`
+3. Memory sideband reads matrix A and B from CPU memory map.
+4. Starts accelerator, waits for `done`.
+5. Writes all 16 output elements to C buffer.
+6. Returns `c00` on `pcpi_rd` with `pcpi_ready`/`pcpi_wr`.
+
+Why it matters:
+1. This is the main integration logic that proves offload works.
+
+### 13.2 `integration/pcpi_demo/tb/tb_picorv32_pcpi_tinyml.v`
+
+Function:
+1. End-to-end integration testbench for custom instruction path.
+
+Important code behavior:
+1. Instantiates PicoRV32 + PCPI wrapper + memory model.
+2. Loads `firmware.hex`.
+3. Watches sentinel write at address `0x0` to confirm `c00`.
+4. Recomputes expected 4x4 output in TB using RTL-exact arithmetic.
+5. Verifies full C buffer content (`16` elements), not only first result.
+6. Emits cycle marker `TB_CYCLES matmul_to_sentinel_cycles=...`.
+
+Why it matters:
+1. This is your primary proof of correctness for accelerator offload.
+
+### 13.3 `integration/pcpi_demo/tb/tb_picorv32_pcpi_handoff.v`
+
+Function:
+1. Verifies mixed execution: custom instruction, regular instructions, then custom instruction again.
+
+Important code behavior:
+1. Checks first custom result sentinel.
+2. Checks regular instruction marker write (`lw/sw/addi` path actually executed).
+3. Checks second custom result sentinel.
+4. Counts handshake quality:
+   - issue count
+   - ready count
+   - wr count
+   - handshake_ok count
+   - C-store count
+
+Why it matters:
+1. Shows CPU control returns cleanly between custom and normal code.
+
+### 13.4 `integration/pcpi_demo/firmware/firmware_matmul_unified.c`
+
+Function:
+1. Single C firmware source used by smoke-C and cycle-compare flows.
+
+Important code behavior:
+1. Compile-time mode switch:
+   - `MATMUL_MODE_ACCEL=1` uses custom instruction offload.
+   - `MATMUL_MODE_SW=1` uses software nested-loop matmul.
+2. Compile-time address macros map to TB-specific memory layout:
+   - `A_BASE_WORD_ADDR`, `B_BASE_WORD_ADDR`, `C_BASE_WORD_ADDR`
+3. Copies `a_init`/`b_init` into RAM.
+4. Runs selected matmul path.
+5. Stores first output element to sentinel address `0x0`.
+6. In accelerator mode, emits explicit custom opcode `.word 0x5420818b`.
+
+Why it matters:
+1. Demonstrates same source-level algorithm harness for fair comparisons.
+
+### 13.5 `integration/pcpi_demo/scripts/run_pcpi_demo.ps1`
+
+Function:
+1. Smoke runner for one integration simulation.
+
+Important code behavior:
+1. Selects firmware variant (`asm` or `c`).
+2. Builds firmware using native toolchain if available, otherwise WSL fallback.
+3. For C variant, passes compile-time mode/address macros to unified firmware.
+4. Compiles TB and runs simulation.
+5. Produces log and waveform file.
+
+Why it matters:
+1. Fast sanity check command for demos and handoff.
+
+### 13.6 `integration/pcpi_demo/scripts/run_cycle_compare.ps1`
+
+Function:
+1. Produces 3-way cycle comparison in one command.
+
+Important code behavior:
+1. Uses firmware lock to avoid concurrent rewrite races.
+2. Builds same unified C firmware in three configurations:
+   - accelerator mode (`rv32i`)
+   - software no-MUL (`rv32i`)
+   - software MUL-enabled (`rv32im`)
+3. Runs three TBs and extracts cycle markers from logs.
+4. Computes speedup ratios and writes markdown/json summaries.
+
+Why it matters:
+1. This is your quantitative performance evidence.
+
+### 13.7 `integration/pcpi_demo/scripts/run_pcpi_local_check.ps1`
+
+Function:
+1. One-command gate for local sanity before push/demo.
+
+Important code behavior:
+1. Runs sequence:
+   - smoke-asm
+   - smoke-c
+   - regression-8case
+   - handoff
+2. Stops immediately on any failure.
+
+Why it matters:
+1. Prevents accidental breakage across flows.
+
+### 13.8 `integration/pcpi_demo/tests/cases.json`
+
+Function:
+1. Baseline regression vector source of truth.
+
+Important code behavior:
+1. Stores named A/B matrices in signed Q5.10 integer form.
+2. Regression script iterates all cases and auto-generates firmware per case.
+
+Why it matters:
+1. Keeps regression deterministic and reviewable.
+
+### 13.9 `integration/pcpi_demo/tests/custom_cases.json`
+
+Function:
+1. Isolated evaluator/mentor custom vectors.
+
+Important code behavior:
+1. Same schema as baseline cases.
+2. Can include generated metadata from real-value converter flow.
+3. Explicit cleanup mode removes generated entries without touching baseline file.
+
+Why it matters:
+1. Lets you test live custom inputs without disturbing official regression set.
+
+### 13.10 `integration/pcpi_demo/TEST_RESULTS_SUMMARY.md`
+
+Function:
+1. Tracked consolidated evidence table for handoff/mentor review.
+
+Important code behavior:
+1. Lists latest pass/fail status per flow.
+2. Captures cycle comparison table and derived ratios.
+3. Documents key intricacies and source artifacts.
+
+Why it matters:
+1. Single reference document to present progress quickly.
 
 ## 14) Final Midsem Readiness Statement
 

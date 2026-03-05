@@ -120,6 +120,7 @@ Optional C firmware variant (same custom instruction semantics):
 
 Note: the C smoke variant and cycle-compare flow both use the shared source
 `integration/pcpi_demo/firmware/firmware_matmul_unified.c` with compile-time mode/address macros.
+Accelerator offload uses an explicitly emitted custom instruction word (`0x5420818b`), not automatic loop-to-accelerator compiler conversion.
 
 Generated artifacts:
 

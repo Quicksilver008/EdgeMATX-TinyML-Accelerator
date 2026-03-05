@@ -58,6 +58,25 @@ wsl bash -lc "riscv64-unknown-elf-gcc --version | head -n 1"
 - `funct7`: `0101010`
 - Machine code in demo program: `0x5420818b`
 
+Why fixed:
+
+1. The PCPI RTL decode matches this exact instruction pattern.
+2. C compiler does not auto-detect nested matmul loops and replace them with custom op.
+3. Firmware must explicitly emit this instruction for accelerator offload.
+
+Assembly representation:
+
+```asm
+.word 0x5420818b
+```
+
+Conceptually this means:
+
+```asm
+# custom matmul rd=x3, rs1=x1 (A base), rs2=x2 (B base)
+custom_matmul x3, x1, x2
+```
+
 ## Demo Program (loaded directly in testbench memory)
 
 1. Copy `a_init[16]` from firmware image into RAM buffer at `0x100`

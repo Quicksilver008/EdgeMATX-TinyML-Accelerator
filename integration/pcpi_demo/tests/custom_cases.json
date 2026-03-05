@@ -1,3 +1,94 @@
 {
-  "cases": []
+  "cases": [
+    {
+      "name": "custom_rand_case1",
+      "notes": "Random real matrix case 1",
+      "a_q5_10": [
+        727,
+        -1270,
+        338,
+        1894,
+        -451,
+        123,
+        -1812,
+        594,
+        1034,
+        -676,
+        973,
+        -1137,
+        502,
+        1352,
+        -276,
+        82
+      ],
+      "b_q5_10": [
+        -952,
+        481,
+        1311,
+        -532,
+        676,
+        -1485,
+        399,
+        1782,
+        -184,
+        932,
+        -1044,
+        563,
+        1239,
+        -379,
+        860,
+        -1669
+      ],
+      "meta": {
+        "generated_by": "real_to_q5_10",
+        "created_at_utc": "2026-03-05T12:32:38Z",
+        "input_source": "C:\\Users\\moham\\AppData\\Local\\Temp\\tinyml_rand_case1.json"
+      }
+    },
+    {
+      "name": "custom_rand_case2",
+      "notes": "Random real matrix case 2",
+      "a_q5_10": [
+        -1618,
+        266,
+        1464,
+        -768,
+        645,
+        -911,
+        174,
+        1116,
+        -1249,
+        492,
+        -348,
+        993,
+        1700,
+        -1065,
+        532,
+        -133
+      ],
+      "b_q5_10": [
+        420,
+        -1341,
+        901,
+        -707,
+        1556,
+        -215,
+        -1198,
+        369,
+        758,
+        1106,
+        -573,
+        -1475,
+        195,
+        1300,
+        -850,
+        635
+      ],
+      "meta": {
+        "generated_by": "real_to_q5_10",
+        "created_at_utc": "2026-03-05T12:32:38Z",
+        "input_source": "C:\\Users\\moham\\AppData\\Local\\Temp\\tinyml_rand_case2.json"
+      }
+    }
+  ]
 }

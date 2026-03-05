@@ -26,6 +26,7 @@ typedef signed short int16_t;
 #error "Exactly one mode must be enabled: MATMUL_MODE_ACCEL or MATMUL_MODE_SW."
 #endif
 
+#ifndef USE_EXTERNAL_CASE_DATA
 static const uint32_t a_init[16] = {
     0x00000400u, 0x00000000u, 0x00000000u, 0x00000000u,
     0x00000000u, 0x00000400u, 0x00000000u, 0x00000000u,
@@ -39,6 +40,9 @@ static const uint32_t b_init[16] = {
     0x00002400u, 0x00002800u, 0x00002c00u, 0x00003000u,
     0x00003400u, 0x00003800u, 0x00003c00u, 0x00004000u
 };
+#else
+#include "firmware_case_data.h"
+#endif
 
 static void copy_inputs(void) {
     volatile uint32_t *const a_dst = (volatile uint32_t *)A_BASE_WORD_ADDR;

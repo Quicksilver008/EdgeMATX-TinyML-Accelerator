@@ -389,6 +389,8 @@ Note: summary and per-case expected JSON are currently ignored via `.gitignore`.
     Legacy files remain for fallback/reference:
     - `integration/pcpi_demo/firmware/firmware_c.c`
     - `integration/pcpi_demo/firmware/firmware_sw_matmul.c`
+15. Custom accelerator instruction remains explicit and fixed in firmware (`0x5420818b`);
+    compiler does not auto-convert generic nested matmul loops into this custom opcode.
 
 ## Immediate Next Work (Do In Order)
 
