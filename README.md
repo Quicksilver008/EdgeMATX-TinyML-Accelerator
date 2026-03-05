@@ -112,6 +112,12 @@ Run from repository root:
 .\integration\pcpi_demo\scripts\run_pcpi_demo.ps1
 ```
 
+Optional C firmware variant (same custom instruction semantics):
+
+```powershell
+.\integration\pcpi_demo\scripts\run_pcpi_demo.ps1 -FirmwareVariant c
+```
+
 Generated artifacts:
 
 - `integration/pcpi_demo/results/pcpi_demo.log`
@@ -138,6 +144,46 @@ Run from repository root:
 ```powershell
 .\integration\pcpi_demo\scripts\run_pcpi_handoff.ps1
 ```
+
+## PCPI One-Command Local Checker
+
+Run from repository root:
+
+```powershell
+.\integration\pcpi_demo\scripts\run_pcpi_local_check.ps1
+```
+
+This script runs smoke (`asm` + `c`), full regression, and handoff, and exits non-zero on any failure.
+
+## PCPI Cycle Comparison
+
+Run from repository root:
+
+```powershell
+.\integration\pcpi_demo\scripts\run_cycle_compare.ps1
+```
+
+This reports cycle counts for software-only matmul vs custom-instruction accelerator matmul, then writes a speedup summary.
+
+## PCPI Professor Demo Cases
+
+Run from repository root:
+
+```powershell
+.\integration\pcpi_demo\scripts\run_pcpi_professor_demo.ps1
+```
+
+This runs an explainable set of matrix cases (identity, negative identity, zero, half-scale, signed passthrough) and produces a concise demo summary.
+
+## Cycle Scaling Estimator
+
+Run from repository root:
+
+```powershell
+python .\integration\pcpi_demo\scripts\estimate_cycle_scaling.py --sizes 4,8,16,32,64
+```
+
+This generates estimated normal-core vs accelerator scaling tables (ideal and overhead-aware) in JSON form.
 
 Generated artifacts:
 

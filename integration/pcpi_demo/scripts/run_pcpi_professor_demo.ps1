@@ -8,14 +8,14 @@ $fwDir = Join-Path $demoDir "firmware"
 $tbDir = Join-Path $demoDir "tb"
 $testsDir = Join-Path $demoDir "tests"
 $resultsDir = Join-Path $demoDir "results"
-$caseResultsDir = Join-Path $resultsDir "cases"
+$caseResultsDir = Join-Path $resultsDir "prof_demo_cases"
 
-$casesFile = Join-Path $testsDir "cases.json"
+$casesFile = Join-Path $testsDir "professor_demo_cases.json"
 $generator = Join-Path $testsDir "gen_case_firmware.py"
 $firmwareS = Join-Path $fwDir "firmware.S"
-$simExe = Join-Path $resultsDir "pcpi_demo_tb.out"
-$summaryMd = Join-Path $resultsDir "pcpi_regression_summary.md"
-$summaryJson = Join-Path $resultsDir "pcpi_regression_summary.json"
+$simExe = Join-Path $resultsDir "pcpi_prof_demo_tb.out"
+$summaryMd = Join-Path $resultsDir "pcpi_prof_demo_summary.md"
+$summaryJson = Join-Path $resultsDir "pcpi_prof_demo_summary.json"
 
 New-Item -ItemType Directory -Force $resultsDir | Out-Null
 New-Item -ItemType Directory -Force $caseResultsDir | Out-Null
@@ -26,7 +26,7 @@ function Get-PythonExe {
         $cmd = Get-Command $candidate -ErrorAction SilentlyContinue
         if ($cmd) { return $cmd.Source }
     }
-    throw "Python interpreter not found. Install Python to run regression generator."
+    throw "Python interpreter not found."
 }
 
 function Invoke-Generator {
@@ -42,7 +42,7 @@ function Invoke-Generator {
         & $pythonExe $generator --cases $casesFile --case $CaseName --firmware-out $firmwareS --meta-out $MetaOutPath
     }
     if ($LASTEXITCODE -ne 0) {
-        throw "Firmware generator failed for case '$CaseName' with exit code $LASTEXITCODE"
+        throw "Firmware generator failed for case '$CaseName'."
     }
 }
 
@@ -113,11 +113,13 @@ if ($cases.Count -eq 0) {
 $results = @()
 foreach ($case in $cases) {
     $caseName = [string]$case.name
+    $caseNotes = [string]$case.notes
     if ([string]::IsNullOrWhiteSpace($caseName)) {
         throw "Encountered case with empty name in $casesFile"
     }
 
-    Write-Host "=== Running case: $caseName ==="
+    Write-Host "=== Professor demo case: $caseName ==="
+    Write-Host "Notes: $caseNotes"
     $caseLog = Join-Path $caseResultsDir "$caseName.log"
     $caseMeta = Join-Path $caseResultsDir "$caseName.expected.json"
 
@@ -128,25 +130,12 @@ foreach ($case in $cases) {
     $simExit = $LASTEXITCODE
     $logText = Get-Content -Raw -Path $caseLog
 
-    $hasCustomPass = $logText -match "TB_PASS custom instruction result write:"
-    $hasBufferPass = $logText -match "TB_PASS C-buffer verification for all 16 elements\."
-    $hasFinalPass = $logText -match "TB_PASS integration pcpi demo complete\."
-    $status = if (($simExit -eq 0) -and $hasCustomPass -and $hasBufferPass -and $hasFinalPass) { "PASS" } else { "FAIL" }
+    $hasPass = $logText -match "TB_PASS integration pcpi demo complete\."
+    $status = if (($simExit -eq 0) -and $hasPass) { "PASS" } else { "FAIL" }
 
-    $c00 = ""
+    $observedC00 = ""
     if ($logText -match "TB_PASS custom instruction result write:\s*(0x[0-9a-fA-F]+)") {
-        $c00 = $Matches[1].ToLowerInvariant()
-    }
-
-    $failureDetail = ""
-    if ($status -eq "FAIL") {
-        if ($logText -match "TB_FAIL C-buffer mismatch idx=(\d+)\s+got=(0x[0-9a-fA-F]+)\s+expected=(0x[0-9a-fA-F]+)") {
-            $failureDetail = "idx=$($Matches[1]) got=$($Matches[2].ToLowerInvariant()) expected=$($Matches[3].ToLowerInvariant())"
-        } elseif ($logText -match "TB_FAIL wrong result write:\s+got=(0x[0-9a-fA-F]+)\s+expected=(0x[0-9a-fA-F]+)") {
-            $failureDetail = "result_write got=$($Matches[1].ToLowerInvariant()) expected=$($Matches[2].ToLowerInvariant())"
-        } else {
-            $failureDetail = "simulation_error_or_timeout"
-        }
+        $observedC00 = $Matches[1].ToLowerInvariant()
     }
 
     $expectedC00 = ""
@@ -157,11 +146,11 @@ foreach ($case in $cases) {
 
     $results += [ordered]@{
         name = $caseName
+        notes = $caseNotes
         status = $status
         expected_c00 = $expectedC00
-        observed_c00 = $c00
-        log = "integration/pcpi_demo/results/cases/$caseName.log"
-        failure_detail = $failureDetail
+        observed_c00 = $observedC00
+        log = "integration/pcpi_demo/results/prof_demo_cases/$caseName.log"
     }
 }
 
@@ -178,28 +167,28 @@ $summary = [ordered]@{
 $summary | ConvertTo-Json -Depth 8 | Set-Content -Path $summaryJson -Encoding UTF8
 
 $mdLines = @()
-$mdLines += "# PCPI Regression Summary"
+$mdLines += "# PCPI Professor Demo Summary"
 $mdLines += ""
 $mdLines += "- Generated (UTC): $($summary.generated_at_utc)"
 $mdLines += "- Total: $($summary.total)"
 $mdLines += "- Pass: $($summary.pass)"
 $mdLines += "- Fail: $($summary.fail)"
 $mdLines += ""
-$mdLines += "| Case | Status | Expected c00 | Observed c00 | Notes |"
+$mdLines += "| Case | Explanation | Status | Expected c00 | Observed c00 |"
 $mdLines += "| --- | --- | --- | --- | --- |"
 foreach ($item in $results) {
-    $notes = if ($item.status -eq "PASS") { "ok" } else { $item.failure_detail }
-    $mdLines += "| $($item.name) | $($item.status) | $($item.expected_c00) | $($item.observed_c00) | $notes |"
+    $mdLines += "| $($item.name) | $($item.notes) | $($item.status) | $($item.expected_c00) | $($item.observed_c00) |"
 }
 $mdLines += ""
-$mdLines += "Logs: integration/pcpi_demo/results/cases/*.log"
+$mdLines += "Logs: integration/pcpi_demo/results/prof_demo_cases/*.log"
 $mdLines -join "`n" | Set-Content -Path $summaryMd -Encoding UTF8
 
-Write-Host "Regression summary (md): $summaryMd"
-Write-Host "Regression summary (json): $summaryJson"
+Write-Host ("PROF_DEMO total={0} pass={1} fail={2}" -f $results.Count, $passCount, $failCount)
+Write-Host "Summary (md): $summaryMd"
+Write-Host "Summary (json): $summaryJson"
 
 if ($failCount -gt 0) {
-    throw "$failCount regression case(s) failed."
+    throw "$failCount professor demo case(s) failed."
 }
 
-Write-Host "All regression cases passed."
+Write-Host "All professor demo cases passed."

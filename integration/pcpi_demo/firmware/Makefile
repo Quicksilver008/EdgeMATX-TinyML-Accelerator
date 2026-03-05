@@ -4,16 +4,19 @@ TOOLCHAIN_PREFIX ?= riscv64-unknown-elf-
 CC := $(TOOLCHAIN_PREFIX)gcc
 OBJCOPY := $(TOOLCHAIN_PREFIX)objcopy
 OBJDUMP := $(TOOLCHAIN_PREFIX)objdump
+CFLAGS ?= -O2
+LDLIBS ?= -lgcc
 
 PICORV32_MAKEHEX ?= ../../../picorv32/firmware/makehex.py
 WORDS ?= 256
+FIRMWARE_SRC ?= firmware.S
 
 all: firmware.hex
 
-firmware.elf: firmware.S sections.lds
-	$(CC) -mabi=ilp32 -march=rv32i -ffreestanding -nostdlib -o $@ \
+firmware.elf: $(FIRMWARE_SRC) sections.lds
+	$(CC) $(CFLAGS) -mabi=ilp32 -march=rv32i -ffreestanding -nostdlib -o $@ \
 		-Wl,--build-id=none,-Bstatic,-T,sections.lds,-Map,firmware.map,--strip-debug \
-		$<
+		$(FIRMWARE_SRC) $(LDLIBS)
 
 firmware.bin: firmware.elf
 	$(OBJCOPY) -O binary $< $@

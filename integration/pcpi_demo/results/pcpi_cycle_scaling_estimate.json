@@ -1,0 +1,71 @@
+{
+  "assumptions": {
+    "software_scaling_ideal": "O(N^3), anchored at sw4",
+    "accelerator_scaling_ideal": "4x4 tiling; calls=(N/4)^3; cost per call=acc4",
+    "software_overhead_model": "ideal + sw_cache_overhead*((N/4)^4 - 1)",
+    "accelerator_overhead_model": "ideal + launch*(calls-1) + partial*(t^2*(t-1)) + contention*((N/4)^4 - 1)",
+    "sw4": 26130.0,
+    "acc4": 869.0,
+    "acc_launch_overhead": 40.0,
+    "acc_partial_overhead": 24.0,
+    "acc_contention_overhead": 120.0,
+    "sw_cache_overhead": 60.0
+  },
+  "rows": [
+    {
+      "n": 4,
+      "software_cycles_ideal_est": 26130.0,
+      "software_cycles_overhead_est": 26130.0,
+      "accel_cycles_ideal_est": 869.0,
+      "accel_cycles_overhead_est": 869.0,
+      "tile_calls": 1,
+      "partial_steps": 0,
+      "speedup_ideal_sw_over_accel_est": 30.069,
+      "speedup_overhead_sw_over_accel_est": 30.069
+    },
+    {
+      "n": 8,
+      "software_cycles_ideal_est": 209040.0,
+      "software_cycles_overhead_est": 209940.0,
+      "accel_cycles_ideal_est": 6952.0,
+      "accel_cycles_overhead_est": 9128.0,
+      "tile_calls": 8,
+      "partial_steps": 4,
+      "speedup_ideal_sw_over_accel_est": 30.069,
+      "speedup_overhead_sw_over_accel_est": 22.9996
+    },
+    {
+      "n": 16,
+      "software_cycles_ideal_est": 1672320.0,
+      "software_cycles_overhead_est": 1687620.0,
+      "accel_cycles_ideal_est": 55616.0,
+      "accel_cycles_overhead_est": 89888.0,
+      "tile_calls": 64,
+      "partial_steps": 48,
+      "speedup_ideal_sw_over_accel_est": 30.069,
+      "speedup_overhead_sw_over_accel_est": 18.7747
+    },
+    {
+      "n": 32,
+      "software_cycles_ideal_est": 13378560.0,
+      "software_cycles_overhead_est": 13624260.0,
+      "accel_cycles_ideal_est": 444928.0,
+      "accel_cycles_overhead_est": 967520.0,
+      "tile_calls": 512,
+      "partial_steps": 448,
+      "speedup_ideal_sw_over_accel_est": 30.069,
+      "speedup_overhead_sw_over_accel_est": 14.0816
+    },
+    {
+      "n": 64,
+      "software_cycles_ideal_est": 107028480.0,
+      "software_cycles_overhead_est": 110960580.0,
+      "accel_cycles_ideal_est": 3559424.0,
+      "accel_cycles_overhead_est": 11679584.0,
+      "tile_calls": 4096,
+      "partial_steps": 3840,
+      "speedup_ideal_sw_over_accel_est": 30.069,
+      "speedup_overhead_sw_over_accel_est": 9.5004
+    }
+  ]
+}

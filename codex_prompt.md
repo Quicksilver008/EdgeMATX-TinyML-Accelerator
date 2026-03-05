@@ -116,6 +116,82 @@ Latest observed pass metrics from handoff run:
 7. `handshake_ok_count=2`
 8. `c_store_count=32`
 
+### G) Optional C firmware smoke path (new)
+
+Added:
+1. C firmware source: `integration/pcpi_demo/firmware/firmware_c.c`
+2. Firmware selector in smoke script: `integration/pcpi_demo/scripts/run_pcpi_demo.ps1 -FirmwareVariant <asm|c>`
+3. Build selector in firmware makeflow: `integration/pcpi_demo/firmware/Makefile` now accepts `FIRMWARE_SRC=...`
+
+Notes:
+1. Default remains assembly (`firmware.S`); existing path unchanged.
+2. C variant uses explicit custom instruction macro with unchanged instruction encoding (`0x5420818b`).
+3. Arithmetic semantics remain RTL-exact Q5.10 wrap (no behavior change).
+
+### H) CI-style local checker (new)
+
+Added:
+1. Script: `integration/pcpi_demo/scripts/run_pcpi_local_check.ps1`
+2. Runs in order:
+   - smoke-asm
+   - smoke-c
+   - regression-8case
+   - handoff
+3. Exits non-zero on first failure.
+
+### I) Architecture-ready SoC contract draft (new)
+
+Added:
+1. `integration/pcpi_demo/SOC_MMIO_CONTRACT.md`
+2. Defines invariants (instruction encoding + Q5.10 wrap semantics) and draft MMIO control register contract for future top-level integration.
+
+### J) Cycle comparison flow (new)
+
+Added:
+1. Software baseline firmware: `integration/pcpi_demo/firmware/firmware_sw_matmul.c`
+2. Software-only baseline testbench: `integration/pcpi_demo/tb/tb_picorv32_sw_matmul.v`
+3. Unified comparison runner: `integration/pcpi_demo/scripts/run_cycle_compare.ps1`
+4. Cycle marker in accelerator TB: `TB_CYCLES matmul_to_sentinel_cycles=...`
+
+What it does:
+1. Generates accelerator firmware for `identity_x_sequence`.
+2. Runs accelerator path and software path.
+3. Extracts cycle counts from both logs.
+4. Emits speedup summary markdown/json.
+
+Latest observed run (2026-03-05):
+1. Accelerator cycles: `869`
+2. Software cycles: `26130`
+3. Speedup (`software / accelerator`): `30.069x`
+4. Summary files:
+   - `integration/pcpi_demo/results/pcpi_cycle_compare_summary.md`
+   - `integration/pcpi_demo/results/pcpi_cycle_compare_summary.json`
+
+### K) Professor-facing demo case flow (new)
+
+Added:
+1. Curated explainable demo cases: `integration/pcpi_demo/tests/professor_demo_cases.json`
+2. Demo runner: `integration/pcpi_demo/scripts/run_pcpi_professor_demo.ps1`
+3. Demo summary outputs:
+   - `integration/pcpi_demo/results/pcpi_prof_demo_summary.md`
+   - `integration/pcpi_demo/results/pcpi_prof_demo_summary.json`
+
+Demo case set:
+1. `demo_identity_passthrough`
+2. `demo_negative_identity`
+3. `demo_zero_matrix`
+4. `demo_half_scale`
+5. `demo_signed_passthrough`
+
+### L) Cycle scaling estimator (normal core vs accelerator) (new)
+
+Added:
+1. Script: `integration/pcpi_demo/scripts/estimate_cycle_scaling.py`
+2. Output: `integration/pcpi_demo/results/pcpi_cycle_scaling_estimate.json`
+3. Supports:
+   - ideal O(N^3) scaling comparison
+   - overhead-aware scaling knobs for tiling/control/contention discussion
+
 ## Toolchain Status
 
 ### Windows native
@@ -178,9 +254,29 @@ From repo root (`TinyML-Accelerator`):
 .\integration\pcpi_demo\scripts\run_pcpi_demo.ps1
 ```
 
+1b. Smoke demo (C firmware variant):
+```powershell
+.\integration\pcpi_demo\scripts\run_pcpi_demo.ps1 -FirmwareVariant c
+```
+
 2. Full 8-case regression:
 ```powershell
 .\integration\pcpi_demo\scripts\run_pcpi_regression.ps1
+```
+
+2b. One-command local checker:
+```powershell
+.\integration\pcpi_demo\scripts\run_pcpi_local_check.ps1
+```
+
+2c. Professor explainable demo run:
+```powershell
+.\integration\pcpi_demo\scripts\run_pcpi_professor_demo.ps1
+```
+
+2d. Cycle scaling estimator:
+```powershell
+python .\integration\pcpi_demo\scripts\estimate_cycle_scaling.py --sizes 4,8,16,32,64
 ```
 
 3. Generate one specific firmware case manually:
@@ -190,7 +286,7 @@ python .\integration\pcpi_demo\tests\gen_case_firmware.py --cases .\integration\
 
 4. Rebuild firmware in WSL manually:
 ```powershell
-wsl bash -lc "cd '/mnt/c/Users/moham/OneDrive/Desktop/Major Project/TinyML-Accelerator/integration/pcpi_demo/firmware' && make clean all PYTHON=python3"
+$fwDirWin=(Resolve-Path .\integration\pcpi_demo\firmware).Path; $fwDirWsl="/mnt/$($fwDirWin.Substring(0,1).ToLower())$($fwDirWin.Substring(2).Replace('\','/'))"; wsl bash -lc "cd '$fwDirWsl' && make clean all PYTHON=python3"
 ```
 
 ## Generated Evidence Files
@@ -212,17 +308,41 @@ Note: summary and per-case expected JSON are currently ignored via `.gitignore`.
 
 1. Stabilize commit boundaries:
    - Separate commits for:
-     - regression infrastructure
-     - docs updates
+     - cycle comparison + demo scripts
+     - documentation updates
      - any unrelated existing changes
-2. Add a C firmware variant for PCPI demo:
-   - keep current assembly path
-   - add optional C-based test program with explicit custom instruction macro
-3. Add CI-style local checker script:
-   - one command that runs smoke + regression and exits non-zero on any failure
-4. Start architecture-ready integration prep:
-   - define memory-mapped/control contract for future SoC/FPGA top-level
-   - keep arithmetic and instruction encoding unchanged
+2. Professor demo readiness:
+   - keep `run_pcpi_professor_demo.ps1` green
+   - keep `run_cycle_compare.ps1` green
+   - prepare 1-page architecture slide using the module/wiring explanation prompt
+3. Hardware progression:
+   - map current PCPI + memory contract to FPGA top-level integration checklist
+   - preserve arithmetic and instruction encoding invariants
+
+## Latest Execution Status (This Session)
+
+Validated on 2026-03-05:
+
+1. Regression:
+   - command: `.\integration\pcpi_demo\scripts\run_pcpi_regression.ps1`
+   - result: PASS (`8/8`)
+2. Handoff:
+   - command: `.\integration\pcpi_demo\scripts\run_pcpi_handoff.ps1`
+   - result: PASS
+   - key metrics: `custom_issue_count=2`, `ready_count=2`, `wr_count=2`, `handshake_ok_count=2`, `c_store_count=32`
+3. Cycle comparison:
+   - command: `.\integration\pcpi_demo\scripts\run_cycle_compare.ps1`
+   - result: PASS
+   - measured: `accel_cycles=869`, `sw_cycles=26130`, `speedup=30.069x`
+4. Cycle scaling estimator:
+   - command: `python .\integration\pcpi_demo\scripts\estimate_cycle_scaling.py --sizes 4,8,16,32,64`
+   - output generated: `integration/pcpi_demo/results/pcpi_cycle_scaling_estimate.json`
+5. Professor demo curated cases:
+   - command: `.\integration\pcpi_demo\scripts\run_pcpi_professor_demo.ps1`
+   - result: PASS (`5/5`)
+   - summary files:
+     - `integration/pcpi_demo/results/pcpi_prof_demo_summary.md`
+     - `integration/pcpi_demo/results/pcpi_prof_demo_summary.json`
 
 ## Not In Scope Yet
 

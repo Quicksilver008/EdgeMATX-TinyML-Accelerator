@@ -1,0 +1,8 @@
+{
+  "generated_at_utc": "2026-03-04T20:46:44Z",
+  "accel_cycles": 869,
+  "sw_cycles": 26130,
+  "speedup_sw_over_accel": 30.069,
+  "accel_log": "integration/pcpi_demo/results/pcpi_cycle_accel.log",
+  "sw_log": "integration/pcpi_demo/results/pcpi_cycle_sw.log"
+}

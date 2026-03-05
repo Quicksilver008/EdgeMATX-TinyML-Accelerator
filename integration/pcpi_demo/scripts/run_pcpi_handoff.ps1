@@ -31,11 +31,12 @@ function Get-PythonExe {
 
 function Convert-ToWslPath {
     param([string]$WindowsPath)
-    $wslPath = & wsl wslpath -a $WindowsPath
-    if ($LASTEXITCODE -ne 0) {
-        throw "Failed to convert path to WSL: $WindowsPath"
+    if ($WindowsPath -match '^[A-Za-z]:\\') {
+        $drive = $WindowsPath.Substring(0, 1).ToLowerInvariant()
+        $rest = $WindowsPath.Substring(2).Replace('\', '/')
+        return "/mnt/$drive$rest"
     }
-    return $wslPath.Trim()
+    throw "Failed to convert path to WSL: $WindowsPath"
 }
 
 function Test-WslToolchain {

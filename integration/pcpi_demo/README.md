@@ -99,6 +99,12 @@ From repo root:
 .\integration\pcpi_demo\scripts\run_pcpi_demo.ps1
 ```
 
+Optional C firmware smoke variant (keeps instruction encoding unchanged, uses explicit custom-op macro):
+
+```powershell
+.\integration\pcpi_demo\scripts\run_pcpi_demo.ps1 -FirmwareVariant c
+```
+
 Regression (8-case suite):
 
 ```powershell
@@ -111,14 +117,41 @@ Handoff/handshake validation (mixed regular + custom instructions):
 .\integration\pcpi_demo\scripts\run_pcpi_handoff.ps1
 ```
 
+Cycle comparison (software baseline vs accelerator custom instruction):
+
+```powershell
+.\integration\pcpi_demo\scripts\run_cycle_compare.ps1
+```
+
+Professor-ready explainable demo cases:
+
+```powershell
+.\integration\pcpi_demo\scripts\run_pcpi_professor_demo.ps1
+```
+
+Cycle scaling estimator (normal core vs accelerator, ideal + overhead-aware model):
+
+```powershell
+python .\integration\pcpi_demo\scripts\estimate_cycle_scaling.py --sizes 4,8,16,32,64
+```
+
+One-command local checker (smoke asm + smoke c + regression + handoff):
+
+```powershell
+.\integration\pcpi_demo\scripts\run_pcpi_local_check.ps1
+```
+
 Firmware flow notes:
 
 - If `riscv64-unknown-elf-gcc` is available, the script rebuilds firmware from:
-  - `integration/pcpi_demo/firmware/firmware.S`
+  - `integration/pcpi_demo/firmware/firmware.S` (default)
+  - `integration/pcpi_demo/firmware/firmware_c.c` (when `-FirmwareVariant c`)
   - `integration/pcpi_demo/firmware/sections.lds`
   - `integration/pcpi_demo/firmware/Makefile`
-- If the toolchain is missing, the script uses checked-in fallback:
+- If native toolchain is missing, scripts try WSL toolchain fallback.
+- If toolchain is missing, asm smoke can use checked-in fallback:
   - `integration/pcpi_demo/firmware/firmware.hex`
+- C smoke variant requires a toolchain rebuild (no stale-hex fallback).
 
 Artifacts:
 
@@ -130,6 +163,17 @@ Artifacts:
 - `integration/pcpi_demo/results/pcpi_handoff.log`
 - `integration/pcpi_demo/results/pcpi_handoff_wave.vcd`
 - `integration/pcpi_demo/results/pcpi_handoff_summary.md`
+- `integration/pcpi_demo/results/pcpi_cycle_accel.log`
+- `integration/pcpi_demo/results/pcpi_cycle_sw.log`
+- `integration/pcpi_demo/results/pcpi_cycle_compare_summary.md`
+- `integration/pcpi_demo/results/pcpi_cycle_compare_summary.json`
+- `integration/pcpi_demo/results/pcpi_prof_demo_summary.md`
+- `integration/pcpi_demo/results/pcpi_prof_demo_summary.json`
+- `integration/pcpi_demo/results/pcpi_cycle_scaling_estimate.json`
+
+Architecture contract draft for future SoC top-level:
+
+- `integration/pcpi_demo/SOC_MMIO_CONTRACT.md`
 
 ## Handoff Test (What It Verifies)
 

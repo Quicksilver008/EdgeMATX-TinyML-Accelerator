@@ -1,0 +1,48 @@
+{
+  "generated_at_utc": "2026-03-04T22:36:52Z",
+  "total": 5,
+  "pass": 5,
+  "fail": 0,
+  "cases": [
+    {
+      "name": "demo_identity_passthrough",
+      "notes": "A = identity, so output C should equal B exactly.",
+      "status": "PASS",
+      "expected_c00": "0x00000400",
+      "observed_c00": "0x00000400",
+      "log": "integration/pcpi_demo/results/prof_demo_cases/demo_identity_passthrough.log"
+    },
+    {
+      "name": "demo_negative_identity",
+      "notes": "A = -identity, so output C should be element-wise negation of B.",
+      "status": "PASS",
+      "expected_c00": "0xfffffc00",
+      "observed_c00": "0xfffffc00",
+      "log": "integration/pcpi_demo/results/prof_demo_cases/demo_negative_identity.log"
+    },
+    {
+      "name": "demo_zero_matrix",
+      "notes": "A = all zeros, so output C must be all zeros regardless of B.",
+      "status": "PASS",
+      "expected_c00": "0x00000000",
+      "observed_c00": "0x00000000",
+      "log": "integration/pcpi_demo/results/prof_demo_cases/demo_zero_matrix.log"
+    },
+    {
+      "name": "demo_half_scale",
+      "notes": "A = 0.5 * identity, so output C should be 0.5 * B.",
+      "status": "PASS",
+      "expected_c00": "0x00000200",
+      "observed_c00": "0x00000200",
+      "log": "integration/pcpi_demo/results/prof_demo_cases/demo_half_scale.log"
+    },
+    {
+      "name": "demo_signed_passthrough",
+      "notes": "A = identity, B has mixed signs; output C should preserve each signed B element.",
+      "status": "PASS",
+      "expected_c00": "0xfffffc00",
+      "observed_c00": "0xfffffc00",
+      "log": "integration/pcpi_demo/results/prof_demo_cases/demo_signed_passthrough.log"
+    }
+  ]
+}

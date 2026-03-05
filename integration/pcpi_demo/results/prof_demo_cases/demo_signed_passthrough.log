@@ -1,0 +1,7 @@
+TB_INFO case=demo_signed_passthrough
+VCD info: dumpfile integration/pcpi_demo/results/pcpi_demo_wave.vcd opened for output.
+TB_PASS custom instruction result write: 0xfffffc00
+TB_PASS C-buffer verification for all 16 elements.
+TB_CYCLES matmul_to_sentinel_cycles=869
+TB_PASS integration pcpi demo complete.
+D:\Major_Project\TinyML-Accelerator\integration\pcpi_demo\tb\tb_picorv32_pcpi_tinyml.v:221: $finish called at 8765000 (1ps)
