@@ -121,14 +121,17 @@ Latest observed pass metrics from handoff run:
 ### G) Optional C firmware smoke path (new)
 
 Added:
-1. C firmware source: `integration/pcpi_demo/firmware/firmware_c.c`
+1. Shared C firmware source for smoke-C and cycle-compare: `integration/pcpi_demo/firmware/firmware_matmul_unified.c`
 2. Firmware selector in smoke script: `integration/pcpi_demo/scripts/run_pcpi_demo.ps1 -FirmwareVariant <asm|c>`
-3. Build selector in firmware makeflow: `integration/pcpi_demo/firmware/Makefile` now accepts `FIRMWARE_SRC=...`
+3. Build selector in firmware makeflow: `integration/pcpi_demo/firmware/Makefile` now accepts `FIRMWARE_SRC=...` and `EXTRA_CFLAGS=...`
 
 Notes:
 1. Default remains assembly (`firmware.S`); existing path unchanged.
-2. C variant uses explicit custom instruction macro with unchanged instruction encoding (`0x5420818b`).
-3. Arithmetic semantics remain RTL-exact Q5.10 wrap (no behavior change).
+2. C variant uses explicit custom instruction macro with unchanged instruction encoding (`0x5420818b`) when built in accelerator mode.
+3. Unified C source uses compile-time mode/address macros:
+   - `MATMUL_MODE_ACCEL` / `MATMUL_MODE_SW`
+   - `A_BASE_WORD_ADDR` / `B_BASE_WORD_ADDR` / `C_BASE_WORD_ADDR`
+4. Arithmetic semantics remain RTL-exact Q5.10 wrap (no behavior change).
 
 ### H) CI-style local checker (new)
 
@@ -150,24 +153,24 @@ Added:
 ### J) Cycle comparison flow (new)
 
 Added:
-1. Software baseline firmware: `integration/pcpi_demo/firmware/firmware_sw_matmul.c`
+1. Shared firmware source for accelerator and software cycle-compare runs: `integration/pcpi_demo/firmware/firmware_matmul_unified.c`
 2. Software-only baseline testbench: `integration/pcpi_demo/tb/tb_picorv32_sw_matmul.v`
 3. Software MUL-enabled baseline testbench: `integration/pcpi_demo/tb/tb_picorv32_sw_matmul_mul.v`
 4. Unified comparison runner: `integration/pcpi_demo/scripts/run_cycle_compare.ps1`
 5. Cycle marker in accelerator TB: `TB_CYCLES matmul_to_sentinel_cycles=...`
 
 What it does:
-1. Generates accelerator firmware for `identity_x_sequence`.
+1. Builds the same C source three times with different compile-time mode/address/ISA knobs.
 2. Runs accelerator path, software no-MUL path (`rv32i`), and software MUL-enabled path (`rv32im`).
 3. Extracts cycle counts from all logs.
 4. Emits speedup summary markdown/json across all three baselines.
 
 Latest observed run (2026-03-05):
-1. Accelerator cycles: `869`
+1. Accelerator cycles: `673`
 2. Software cycles (no-MUL): `26130`
 3. Software cycles (MUL-enabled): `7975`
-4. Speedup (`sw_no_mul / accelerator`): `30.069x`
-5. Speedup (`sw_mul / accelerator`): `9.1772x`
+4. Speedup (`sw_no_mul / accelerator`): `38.8262x`
+5. Speedup (`sw_mul / accelerator`): `11.8499x`
 6. MUL benefit (`sw_no_mul / sw_mul`): `3.2765x`
 7. Summary files:
    - `integration/pcpi_demo/results/pcpi_cycle_compare_summary.md`
@@ -203,7 +206,7 @@ Added:
 Added/updated:
 1. `.gitignore` now ignores generated cycle/prof-demo/custom-case outputs and `pynq_z2_custom_core/build/*.out`.
 2. `integration/pcpi_demo/firmware/firmware_c.c` now preserves/restores ABI-critical registers around the fixed custom instruction encoding path.
-3. `integration/pcpi_demo/firmware/Makefile` now includes `-msmall-data-limit=0` and configurable `ARCH`/`ABI` to support controlled `rv32i` vs `rv32im` baseline comparisons.
+3. `integration/pcpi_demo/firmware/Makefile` now includes `-msmall-data-limit=0`, configurable `ARCH`/`ABI`, and `EXTRA_CFLAGS` for mode/address macro wiring.
 4. `integration/pcpi_demo/scripts/run_cycle_compare.ps1` and `integration/pcpi_demo/scripts/run_pcpi_professor_demo.ps1` now use a shared lock file (`integration/pcpi_demo/firmware/.firmware_flow.lock`) to serialize firmware-rewrite flows.
 5. Added tracked consolidated evidence file: `integration/pcpi_demo/TEST_RESULTS_SUMMARY.md`.
 
@@ -340,7 +343,7 @@ $fwDirWin=(Resolve-Path .\integration\pcpi_demo\firmware).Path; $fwDirWsl="/mnt/
 
 5. Rebuild firmware in WSL with M extension enabled (for MUL baseline experiments):
 ```powershell
-$fwDirWin=(Resolve-Path .\integration\pcpi_demo\firmware).Path; $fwDirWsl="/mnt/$($fwDirWin.Substring(0,1).ToLower())$($fwDirWin.Substring(2).Replace('\','/'))"; wsl bash -lc "cd '$fwDirWsl' && make clean all PYTHON=python3 FIRMWARE_SRC=firmware_sw_matmul.c ARCH=rv32im WORDS=1024"
+$fwDirWin=(Resolve-Path .\integration\pcpi_demo\firmware).Path; $fwDirWsl="/mnt/$($fwDirWin.Substring(0,1).ToLower())$($fwDirWin.Substring(2).Replace('\','/'))"; wsl bash -lc "cd '$fwDirWsl' && make clean all PYTHON=python3 FIRMWARE_SRC=firmware_matmul_unified.c ARCH=rv32im WORDS=1024 EXTRA_CFLAGS='-DMATMUL_MODE_ACCEL=0 -DMATMUL_MODE_SW=1 -DA_BASE_WORD_ADDR=0x800u -DB_BASE_WORD_ADDR=0x840u -DC_BASE_WORD_ADDR=0x900u'"
 ```
 
 ## Generated Evidence Files
@@ -381,6 +384,11 @@ Note: summary and per-case expected JSON are currently ignored via `.gitignore`.
     - custom generated vectors: `integration/pcpi_demo/tests/custom_cases.json`
     - cleanup command: `python .\integration\pcpi_demo\tests\real_to_q5_10_case.py --clear-generated`
 13. `run_pcpi_custom_case.ps1` rewrites firmware inputs and uses the shared firmware flow lock; do not run concurrent firmware-rewrite scripts without lock discipline.
+14. Smoke-C and cycle-compare are unified at source level using:
+    - `integration/pcpi_demo/firmware/firmware_matmul_unified.c`
+    Legacy files remain for fallback/reference:
+    - `integration/pcpi_demo/firmware/firmware_c.c`
+    - `integration/pcpi_demo/firmware/firmware_sw_matmul.c`
 
 ## Immediate Next Work (Do In Order)
 
@@ -411,8 +419,8 @@ Validated on 2026-03-05:
 3. Cycle comparison:
    - command: `.\integration\pcpi_demo\scripts\run_cycle_compare.ps1`
    - result: PASS
-   - measured: `accel_cycles=869`, `sw_nomul_cycles=26130`, `sw_mul_cycles=7975`
-   - ratios: `sw_nomul/accel=30.069x`, `sw_mul/accel=9.1772x`, `sw_nomul/sw_mul=3.2765x`
+   - measured: `accel_cycles=673`, `sw_nomul_cycles=26130`, `sw_mul_cycles=7975`
+   - ratios: `sw_nomul/accel=38.8262x`, `sw_mul/accel=11.8499x`, `sw_nomul/sw_mul=3.2765x`
 4. Cycle scaling estimator:
    - command: `python .\integration\pcpi_demo\scripts\estimate_cycle_scaling.py --sizes 4,8,16,32,64`
    - output generated: `integration/pcpi_demo/results/pcpi_cycle_scaling_estimate.json`

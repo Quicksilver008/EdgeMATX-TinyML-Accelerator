@@ -105,6 +105,11 @@ Optional C firmware smoke variant (keeps instruction encoding unchanged, uses ex
 .\integration\pcpi_demo\scripts\run_pcpi_demo.ps1 -FirmwareVariant c
 ```
 
+Smoke C and cycle-comparison now share one firmware source:
+
+- `integration/pcpi_demo/firmware/firmware_matmul_unified.c`
+- build mode is selected via `EXTRA_CFLAGS` macros (`MATMUL_MODE_ACCEL` vs `MATMUL_MODE_SW`) plus base-address macros.
+
 Regression (8-case suite):
 
 ```powershell
@@ -132,11 +137,11 @@ This run reports:
 
 Latest verified cycle values (2026-03-05):
 
-1. Accelerator: `869`
+1. Accelerator: `673`
 2. Software no-MUL (`rv32i`): `26130`
 3. Software MUL-enabled (`rv32im`): `7975`
-4. Accelerator speedup vs no-MUL software: `30.069x`
-5. Accelerator speedup vs MUL-enabled software: `9.1772x`
+4. Accelerator speedup vs no-MUL software: `38.8262x`
+5. Accelerator speedup vs MUL-enabled software: `11.8499x`
 6. MUL-enabled software speedup vs no-MUL software: `3.2765x`
 
 Professor-ready explainable demo cases:
@@ -191,13 +196,16 @@ Firmware flow notes:
 
 - If `riscv64-unknown-elf-gcc` is available, the script rebuilds firmware from:
   - `integration/pcpi_demo/firmware/firmware.S` (default)
-  - `integration/pcpi_demo/firmware/firmware_c.c` (when `-FirmwareVariant c`)
+  - `integration/pcpi_demo/firmware/firmware_matmul_unified.c` (when `-FirmwareVariant c`)
   - `integration/pcpi_demo/firmware/sections.lds`
   - `integration/pcpi_demo/firmware/Makefile`
 - If native toolchain is missing, scripts try WSL toolchain fallback.
 - If toolchain is missing, asm smoke can use checked-in fallback:
   - `integration/pcpi_demo/firmware/firmware.hex`
 - C smoke variant requires a toolchain rebuild (no stale-hex fallback).
+- Legacy firmware sources retained as fallback/reference:
+  - `integration/pcpi_demo/firmware/firmware_c.c`
+  - `integration/pcpi_demo/firmware/firmware_sw_matmul.c`
 
 Artifacts:
 

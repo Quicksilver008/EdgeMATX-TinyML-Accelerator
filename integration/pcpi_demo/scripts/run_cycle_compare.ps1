@@ -6,7 +6,6 @@ $demoDir = Split-Path -Parent $scriptDir
 $repoRoot = Split-Path -Parent (Split-Path -Parent $demoDir)
 $fwDir = Join-Path $demoDir "firmware"
 $tbDir = Join-Path $demoDir "tb"
-$testsDir = Join-Path $demoDir "tests"
 $resultsDir = Join-Path $demoDir "results"
 $flowLockPath = Join-Path $fwDir ".firmware_flow.lock"
 
@@ -18,10 +17,9 @@ $swMulLog = Join-Path $resultsDir "pcpi_cycle_sw_mul.log"
 $summaryMd = Join-Path $resultsDir "pcpi_cycle_compare_summary.md"
 $summaryJson = Join-Path $resultsDir "pcpi_cycle_compare_summary.json"
 
-$casesFile = Join-Path $testsDir "cases.json"
-$generator = Join-Path $testsDir "gen_case_firmware.py"
-$firmwareS = Join-Path $fwDir "firmware.S"
-$metaOut = Join-Path $resultsDir "pcpi_cycle_compare_identity.expected.json"
+$unifiedFirmwareSrc = "firmware_matmul_unified.c"
+$accelExtraCFlags = "-DMATMUL_MODE_ACCEL=1 -DMATMUL_MODE_SW=0 -DA_BASE_WORD_ADDR=0x100u -DB_BASE_WORD_ADDR=0x140u -DC_BASE_WORD_ADDR=0x200u"
+$swExtraCFlags = "-DMATMUL_MODE_ACCEL=0 -DMATMUL_MODE_SW=1 -DA_BASE_WORD_ADDR=0x800u -DB_BASE_WORD_ADDR=0x840u -DC_BASE_WORD_ADDR=0x900u"
 
 function Acquire-FlowLock {
     param(
@@ -63,38 +61,22 @@ function Test-WslToolchain {
     return ($LASTEXITCODE -eq 0)
 }
 
-function Get-PythonExe {
-    $candidates = @("python", "py")
-    foreach ($candidate in $candidates) {
-        $cmd = Get-Command $candidate -ErrorAction SilentlyContinue
-        if ($cmd) { return $cmd.Source }
-    }
-    throw "Python interpreter not found."
-}
-
-function Prepare-IdentityAccelCase {
-    $pythonExe = Get-PythonExe
-    if ([System.IO.Path]::GetFileName($pythonExe).ToLowerInvariant() -eq "py.exe") {
-        & $pythonExe -3 $generator --cases $casesFile --case identity_x_sequence --firmware-out $firmwareS --meta-out $metaOut
-    } else {
-        & $pythonExe $generator --cases $casesFile --case identity_x_sequence --firmware-out $firmwareS --meta-out $metaOut
-    }
-    if ($LASTEXITCODE -ne 0) {
-        throw "Failed to generate identity firmware case for accelerator run."
-    }
-}
-
 function Build-Firmware {
     param(
         [string]$SourceFileName,
         [int]$Words,
-        [string]$Arch = "rv32i"
+        [string]$Arch = "rv32i",
+        [string]$ExtraCFlags = ""
     )
 
     $nativeToolchain = Get-Command riscv64-unknown-elf-gcc -ErrorAction SilentlyContinue
     if ($nativeToolchain) {
         Write-Host "Using native Windows RISC-V toolchain for $SourceFileName (ARCH=$Arch)."
-        & make -C $fwDir clean all "FIRMWARE_SRC=$SourceFileName" "WORDS=$Words" "ARCH=$Arch"
+        $makeArgs = @("-C", $fwDir, "clean", "all", "FIRMWARE_SRC=$SourceFileName", "WORDS=$Words", "ARCH=$Arch")
+        if (-not [string]::IsNullOrWhiteSpace($ExtraCFlags)) {
+            $makeArgs += "EXTRA_CFLAGS=$ExtraCFlags"
+        }
+        & make @makeArgs
         if ($LASTEXITCODE -ne 0) {
             throw "Native firmware build failed for $SourceFileName with exit code $LASTEXITCODE"
         }
@@ -105,7 +87,11 @@ function Build-Firmware {
     if ($wslCmd -and (Test-WslToolchain)) {
         Write-Host "Using WSL RISC-V toolchain fallback for $SourceFileName (ARCH=$Arch)."
         $fwDirWsl = Convert-ToWslPath $fwDir
-        & wsl bash -lc "cd '$fwDirWsl' && make clean all PYTHON=python3 FIRMWARE_SRC=$SourceFileName WORDS=$Words ARCH=$Arch"
+        $makeCmd = "cd '$fwDirWsl' && make clean all PYTHON=python3 FIRMWARE_SRC=$SourceFileName WORDS=$Words ARCH=$Arch"
+        if (-not [string]::IsNullOrWhiteSpace($ExtraCFlags)) {
+            $makeCmd += " EXTRA_CFLAGS='$ExtraCFlags'"
+        }
+        & wsl bash -lc $makeCmd
         if ($LASTEXITCODE -ne 0) {
             throw "WSL firmware build failed for $SourceFileName with exit code $LASTEXITCODE"
         }
@@ -122,7 +108,8 @@ function Run-Sim {
         [string]$TbFile,
         [string]$LogFile,
         [int]$FirmwareWords,
-        [string]$Arch = "rv32i"
+        [string]$Arch = "rv32i",
+        [string]$ExtraCFlags = ""
     )
 
     $simExe = Join-Path $resultsDir ("{0}.out" -f $Name)
@@ -136,7 +123,7 @@ function Run-Sim {
         (Join-Path $tbDir $TbFile)
     )
 
-    Build-Firmware -SourceFileName $FirmwareSrc -Words $FirmwareWords -Arch $Arch
+    Build-Firmware -SourceFileName $FirmwareSrc -Words $FirmwareWords -Arch $Arch -ExtraCFlags $ExtraCFlags
 
     Write-Host "Compiling $Name testbench..."
     & iverilog -g2012 -o $simExe @sources
@@ -160,10 +147,9 @@ function Get-CycleCountFromLog {
     throw "Cycle marker not found in $LogFile"
 }
 
-Prepare-IdentityAccelCase
-Run-Sim -Name "pcpi_cycle_accel" -FirmwareSrc "firmware.S" -TbFile "tb_picorv32_pcpi_tinyml.v" -LogFile $accelLog -FirmwareWords 256 -Arch "rv32i"
-Run-Sim -Name "pcpi_cycle_sw_nomul" -FirmwareSrc "firmware_sw_matmul.c" -TbFile "tb_picorv32_sw_matmul.v" -LogFile $swNoMulLog -FirmwareWords 1024 -Arch "rv32i"
-Run-Sim -Name "pcpi_cycle_sw_mul" -FirmwareSrc "firmware_sw_matmul.c" -TbFile "tb_picorv32_sw_matmul_mul.v" -LogFile $swMulLog -FirmwareWords 1024 -Arch "rv32im"
+Run-Sim -Name "pcpi_cycle_accel" -FirmwareSrc $unifiedFirmwareSrc -TbFile "tb_picorv32_pcpi_tinyml.v" -LogFile $accelLog -FirmwareWords 256 -Arch "rv32i" -ExtraCFlags $accelExtraCFlags
+Run-Sim -Name "pcpi_cycle_sw_nomul" -FirmwareSrc $unifiedFirmwareSrc -TbFile "tb_picorv32_sw_matmul.v" -LogFile $swNoMulLog -FirmwareWords 1024 -Arch "rv32i" -ExtraCFlags $swExtraCFlags
+Run-Sim -Name "pcpi_cycle_sw_mul" -FirmwareSrc $unifiedFirmwareSrc -TbFile "tb_picorv32_sw_matmul_mul.v" -LogFile $swMulLog -FirmwareWords 1024 -Arch "rv32im" -ExtraCFlags $swExtraCFlags
 
 $accelCycles = Get-CycleCountFromLog -LogFile $accelLog
 $swNoMulCycles = Get-CycleCountFromLog -LogFile $swNoMulLog
@@ -195,6 +181,7 @@ $summary = [ordered]@{
         sw_nomul_arch = "rv32i"
         sw_mul_arch = "rv32im"
         accel_arch = "rv32i"
+        firmware_source = $unifiedFirmwareSrc
     }
     accel_log = "integration/pcpi_demo/results/pcpi_cycle_accel.log"
     sw_nomul_log = "integration/pcpi_demo/results/pcpi_cycle_sw_nomul.log"

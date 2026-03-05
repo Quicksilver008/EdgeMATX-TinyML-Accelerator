@@ -5,6 +5,7 @@ CC := $(TOOLCHAIN_PREFIX)gcc
 OBJCOPY := $(TOOLCHAIN_PREFIX)objcopy
 OBJDUMP := $(TOOLCHAIN_PREFIX)objdump
 CFLAGS ?= -O2 -msmall-data-limit=0
+EXTRA_CFLAGS ?=
 LDLIBS ?= -lgcc
 ABI ?= ilp32
 ARCH ?= rv32i
@@ -16,7 +17,7 @@ FIRMWARE_SRC ?= firmware.S
 all: firmware.hex
 
 firmware.elf: $(FIRMWARE_SRC) sections.lds
-	$(CC) $(CFLAGS) -mabi=$(ABI) -march=$(ARCH) -ffreestanding -nostdlib -o $@ \
+	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -mabi=$(ABI) -march=$(ARCH) -ffreestanding -nostdlib -o $@ \
 		-Wl,--build-id=none,-Bstatic,-T,sections.lds,-Map,firmware.map,--strip-debug \
 		$(FIRMWARE_SRC) $(LDLIBS)
 

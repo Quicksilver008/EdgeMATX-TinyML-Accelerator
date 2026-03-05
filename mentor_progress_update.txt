@@ -86,11 +86,11 @@ Team Branch: main
 
 4.2 Latest measured values (identity_x_sequence)
 - Script: .\integration\pcpi_demo\scripts\run_cycle_compare.ps1
-- Accelerator cycles: 869
+- Accelerator cycles: 673
 - Software no-MUL cycles: 26130
 - Software MUL-enabled cycles: 7975
-- Speedup (SW no-MUL / accelerator): 30.069x
-- Speedup (SW MUL / accelerator): 9.1772x
+- Speedup (SW no-MUL / accelerator): 38.8262x
+- Speedup (SW MUL / accelerator): 11.8499x
 - SW MUL benefit (SW no-MUL / SW MUL): 3.2765x
 
 Important technical note:
@@ -106,6 +106,9 @@ Important technical note:
   - preserves/restores ABI-critical registers around fixed custom instruction path.
 - Makefile now supports configurable ARCH/ABI for controlled rv32i vs rv32im experiments.
 - Added strict real->Q5.10 conversion utility with signed16 bounds checking and explicit generated-case cleanup mode.
+- Smoke-C and cycle-compare firmware are now unified at source level:
+  - integration/pcpi_demo/firmware/firmware_matmul_unified.c
+  - mode/address selection done via build-time EXTRA_CFLAGS macros.
 
 6) Documentation and Handoff Discipline
 - Updated docs:

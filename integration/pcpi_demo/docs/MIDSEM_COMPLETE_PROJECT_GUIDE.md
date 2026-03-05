@@ -111,10 +111,14 @@ Important firmware variants:
 
 1. `firmware.S`:
    - assembly path for PCPI custom instruction tests/regression
-2. `firmware_c.c`:
-   - C variant for smoke; still executes same custom instruction encoding
-3. `firmware_sw_matmul.c`:
-   - software-only 4x4 matmul baseline for cycle comparison
+2. `firmware_matmul_unified.c`:
+   - shared C source used for smoke-C and 3-way cycle comparison
+   - compile-time macros select mode:
+     - accelerator custom-op path (`MATMUL_MODE_ACCEL=1`)
+     - software matmul path (`MATMUL_MODE_SW=1`)
+   - compile-time base-address macros map to each testbench memory layout
+3. `firmware_c.c` and `firmware_sw_matmul.c`:
+   - retained as fallback/reference sources
 4. `firmware_handoff.S`:
    - test regular instructions in-between two custom instructions
 

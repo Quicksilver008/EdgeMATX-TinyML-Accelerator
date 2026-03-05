@@ -118,6 +118,9 @@ Optional C firmware variant (same custom instruction semantics):
 .\integration\pcpi_demo\scripts\run_pcpi_demo.ps1 -FirmwareVariant c
 ```
 
+Note: the C smoke variant and cycle-compare flow both use the shared source
+`integration/pcpi_demo/firmware/firmware_matmul_unified.c` with compile-time mode/address macros.
+
 Generated artifacts:
 
 - `integration/pcpi_demo/results/pcpi_demo.log`
@@ -173,11 +176,11 @@ and writes speedup ratios across all three.
 
 Latest verified (2026-03-05):
 
-1. `accel_cycles=869`
+1. `accel_cycles=673`
 2. `sw_nomul_cycles=26130` (`rv32i`, `ENABLE_MUL=0`)
 3. `sw_mul_cycles=7975` (`rv32im`, `ENABLE_MUL=1`)
-4. `sw_nomul/accel=30.069x`
-5. `sw_mul/accel=9.1772x`
+4. `sw_nomul/accel=38.8262x`
+5. `sw_mul/accel=11.8499x`
 6. `sw_nomul/sw_mul=3.2765x`
 
 ## PCPI Professor Demo Cases
@@ -236,6 +239,7 @@ python .\integration\pcpi_demo\tests\real_to_q5_10_case.py --clear-generated
    - `integration/pcpi_demo/results/prof_demo_cases/*`
    - `pynq_z2_custom_core/build/*.out`
 2. `run_cycle_compare.ps1` and `run_pcpi_professor_demo.ps1` now use a shared lock file (`integration/pcpi_demo/firmware/.firmware_flow.lock`) to avoid concurrent firmware rewrite races.
+   - `run_pcpi_custom_case.ps1` also uses this lock.
 3. After any code/script/RTL/testbench change, update both:
    - `README.md`
    - `codex_prompt.md`

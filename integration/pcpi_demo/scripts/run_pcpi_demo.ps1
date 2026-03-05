@@ -18,10 +18,16 @@ $simExe = Join-Path $resultsDir "pcpi_demo_tb.out"
 $logFile = Join-Path $resultsDir "pcpi_demo.log"
 $fwHex = Join-Path $fwDir "firmware.hex"
 
-$firmwareSource = if ($FirmwareVariant -eq "c") {
-    Join-Path $fwDir "firmware_c.c"
+$firmwareSourceName = if ($FirmwareVariant -eq "c") {
+    "firmware_matmul_unified.c"
 } else {
-    Join-Path $fwDir "firmware.S"
+    "firmware.S"
+}
+$firmwareSource = Join-Path $fwDir $firmwareSourceName
+$extraCFlags = if ($FirmwareVariant -eq "c") {
+    "-DMATMUL_MODE_ACCEL=1 -DMATMUL_MODE_SW=0 -DA_BASE_WORD_ADDR=0x100u -DB_BASE_WORD_ADDR=0x140u -DC_BASE_WORD_ADDR=0x200u"
+} else {
+    ""
 }
 
 function Convert-ToWslPath {
@@ -44,7 +50,11 @@ function Build-Firmware {
     $nativeToolchain = Get-Command riscv64-unknown-elf-gcc -ErrorAction SilentlyContinue
     if ($nativeToolchain) {
         Write-Host "Using native Windows RISC-V toolchain."
-        & make -C $fwDir clean all "FIRMWARE_SRC=$([System.IO.Path]::GetFileName($firmwareSource))"
+        $makeArgs = @("-C", $fwDir, "clean", "all", "FIRMWARE_SRC=$firmwareSourceName")
+        if (-not [string]::IsNullOrWhiteSpace($extraCFlags)) {
+            $makeArgs += "EXTRA_CFLAGS=$extraCFlags"
+        }
+        & make @makeArgs
         if ($LASTEXITCODE -ne 0) {
             throw "Native firmware build failed with exit code $LASTEXITCODE"
         }
@@ -55,8 +65,11 @@ function Build-Firmware {
     if ($wslCmd -and (Test-WslToolchain)) {
         Write-Host "Using WSL RISC-V toolchain fallback."
         $fwDirWsl = Convert-ToWslPath $fwDir
-        $variantName = [System.IO.Path]::GetFileName($firmwareSource)
-        & wsl bash -lc "cd '$fwDirWsl' && make clean all PYTHON=python3 FIRMWARE_SRC=$variantName"
+        $makeCmd = "cd '$fwDirWsl' && make clean all PYTHON=python3 FIRMWARE_SRC=$firmwareSourceName"
+        if (-not [string]::IsNullOrWhiteSpace($extraCFlags)) {
+            $makeCmd += " EXTRA_CFLAGS='$extraCFlags'"
+        }
+        & wsl bash -lc $makeCmd
         if ($LASTEXITCODE -eq 0) {
             return
         }

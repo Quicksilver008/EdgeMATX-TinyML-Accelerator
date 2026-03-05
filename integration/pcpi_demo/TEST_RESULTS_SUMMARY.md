@@ -28,14 +28,14 @@ Case: `identity_x_sequence` (Q5.10)
 
 | Path | Core Config | Firmware ISA Arch | Cycles |
 | --- | --- | --- | ---: |
-| Accelerator custom instruction | `ENABLE_PCPI=1`, `ENABLE_MUL=0`, `ENABLE_FAST_MUL=0` | `rv32i` | 869 |
+| Accelerator custom instruction | `ENABLE_PCPI=1`, `ENABLE_MUL=0`, `ENABLE_FAST_MUL=0` | `rv32i` | 673 |
 | Software baseline (no MUL) | `ENABLE_PCPI=0`, `ENABLE_MUL=0`, `ENABLE_FAST_MUL=0` | `rv32i` | 26130 |
 | Software baseline (MUL enabled) | `ENABLE_PCPI=0`, `ENABLE_MUL=1`, `ENABLE_FAST_MUL=0` | `rv32im` | 7975 |
 
 Derived ratios:
 
-1. Accelerator speedup over SW no-MUL: `26130 / 869 = 30.069x`
-2. Accelerator speedup over SW MUL-enabled: `7975 / 869 = 9.1772x`
+1. Accelerator speedup over SW no-MUL: `26130 / 673 = 38.8262x`
+2. Accelerator speedup over SW MUL-enabled: `7975 / 673 = 11.8499x`
 3. SW MUL benefit over SW no-MUL: `26130 / 7975 = 3.2765x`
 
 ## 3) Intricacies That Matter
@@ -53,6 +53,7 @@ Derived ratios:
    - baseline remains in `integration/pcpi_demo/tests/cases.json`
    - custom generated entries are stored in `integration/pcpi_demo/tests/custom_cases.json`
    - explicit cleanup is available via `--clear-generated`
+9. Smoke-C and cycle-compare now share one firmware source (`integration/pcpi_demo/firmware/firmware_matmul_unified.c`) with compile-time mode/address macros; regression/prof/handoff default paths remain unchanged.
 
 ## 4) Source Artifacts
 
@@ -64,3 +65,4 @@ Derived ratios:
 6. `integration/pcpi_demo/simulation/gtkwave/*.gtkw`
 7. `integration/pcpi_demo/tests/custom_cases.json`
 8. `integration/pcpi_demo/tests/real_to_q5_10_case.py`
+9. `integration/pcpi_demo/firmware/firmware_matmul_unified.c`
