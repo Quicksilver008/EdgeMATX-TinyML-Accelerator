@@ -20,6 +20,7 @@ TinyML-Accelerator is a major project focused on building a TinyML accelerator o
 1. `start_here/README.md`
 2. `start_here/EVAL_FLOW.md`
 3. `integration/pcpi_demo/README.md`
+4. `docs/diagrams/pcpi_wrapper_realistic_block_diagram.drawio.xml` (updated architecture view aligned to current RTL wrapper behavior)
 
 ## Dependencies (Install Before Running)
 
@@ -295,13 +296,21 @@ python .\integration\pcpi_demo\tests\real_to_q5_10_case.py --clear-generated
    - `run_pcpi_custom_cycle_compare.ps1` also uses this lock.
 3. After any code/script/RTL/testbench change, update both:
    - `README.md`
-   - `codex_prompt.md`
+   - `handoff_project_context.md`
 4. Consolidated tracked handoff/testing table is maintained at:
    - `integration/pcpi_demo/TEST_RESULTS_SUMMARY.md`
 5. Mentor-facing progress brief is maintained at:
    - `mentor_progress_update.txt`
 6. Beginner-to-advanced full project walkthrough is maintained at:
    - `integration/pcpi_demo/docs/MIDSEM_COMPLETE_PROJECT_GUIDE.md`
+7. Dedicated RTL learning docs (wrapper, accelerator, systolic concept, end-to-end interaction) are at:
+   - `integration/pcpi_demo/docs/RTL_WRAPPER_LINE_BY_LINE.md`
+   - `integration/pcpi_demo/docs/RTL_ACCELERATOR_LINE_BY_LINE.md`
+   - `integration/pcpi_demo/docs/SYSTOLIC_ARRAY_FROM_SCRATCH.md`
+   - `integration/pcpi_demo/docs/END_TO_END_BLOCK_INTERACTION.md`
+8. Interactive web visualizer for architecture + handshake animation is at:
+   - `integration/pcpi_demo/visualizer/README.md`
+   - `integration/pcpi_demo/visualizer/index.html`
 
 Generated artifacts:
 
