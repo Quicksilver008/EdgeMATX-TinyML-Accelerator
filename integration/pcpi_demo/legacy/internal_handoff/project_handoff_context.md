@@ -1,6 +1,6 @@
 # Codex Handoff Prompt (Compaction-Safe)
 
-Last updated: 2026-03-05
+Last updated: 2026-03-07
 
 This file is the single source of truth to resume work after context compaction.
 
@@ -29,6 +29,9 @@ Build a TinyML-oriented matrix accelerator flow on RISC-V (final target: Pynq-Z2
 
 - Repository root: `TinyML-Accelerator`
 - Active working branch: `main`
+- Public-facing repo polish now includes:
+  - root `LICENSE` (MIT)
+  - tightened root `README.md` intro/map for GitHub readers
 - Recent local commits on `main`:
   - `8630966` (`Add isolated custom 3-variant cycle compare flow`)
   - `3e805d3` (`Unify smoke and cycle compare on one firmware source`)

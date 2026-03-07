@@ -1,26 +1,44 @@
 # TinyML-Accelerator
 
-TinyML-Accelerator is a major project focused on building a TinyML accelerator on top of a RISC-V based hardware platform.
+TinyML-Accelerator is a Verilog-based RISC-V accelerator project that integrates a 4x4 fixed-point matrix-multiplication engine with PicoRV32 through the PCPI custom-instruction interface.
 
-## Primary Areas
+The repository is organized around a simulation-first workflow:
+1. standalone accelerator validation,
+2. PicoRV32 + PCPI integration,
+3. firmware-driven regression and cycle comparison,
+4. preparation for later FPGA deployment on Pynq-Z2.
 
-- `start_here/`: Quick-entry docs for evaluation commands and live demo flow.
-- `integration/pcpi_demo/`: Primary PicoRV32+PCPI+accelerator integration flow.
-- `accel_standalone/`: Standalone accelerator RTL evaluation flow (renamed from `midsem_sim`).
-- `picorv32/`: Vendored PicoRV32 core from YosysHQ.
-- `RISC-V/`: Vendored Verilog implementation of a 5-stage pipelined RV32I core.
+## Project Highlights
 
-## Legacy / Fallback Areas
+1. 4x4 Q5.10 systolic matrix accelerator RTL.
+2. PicoRV32 integration through a custom PCPI instruction.
+3. Scripted regression, handoff validation, and 3-way cycle comparison.
+4. Live real-input flow for evaluator-provided matrices.
+5. Beginner-focused documentation for wrapper RTL, accelerator RTL, and systolic-array concepts.
 
-- `midsem_sim/`: Compatibility shim for old command paths (forwards to `accel_standalone`).
-- `integration/pcpi_demo/legacy/`: Fallback/reference assets kept separate from active flow.
+## Current Status
 
-## Where To Go First
+1. Standalone accelerator RTL is validated in simulation.
+2. PicoRV32 + PCPI integration is working end-to-end in simulation.
+3. Firmware-driven smoke, regression, handoff, professor-demo, and cycle-compare flows are available.
+4. FPGA timing closure and on-board performance measurement remain future work.
+
+## Repository Map
+
+1. `start_here/`: quick-entry docs and evaluation flow.
+2. `integration/pcpi_demo/`: main PicoRV32 + PCPI + accelerator flow.
+3. `accel_standalone/`: standalone accelerator RTL evaluation flow.
+4. `picorv32/`: vendored PicoRV32 core from YosysHQ.
+5. `RISC-V/`: vendored RV32I core reference implementation.
+6. `midsem_sim/`: compatibility shim for older standalone-flow paths.
+7. `integration/pcpi_demo/legacy/`: fallback/reference assets separated from active flow.
+
+## Start Here
 
 1. `start_here/README.md`
 2. `start_here/EVAL_FLOW.md`
 3. `integration/pcpi_demo/README.md`
-4. `docs/diagrams/pcpi_wrapper_realistic_block_diagram.drawio.xml` (updated architecture view aligned to current RTL wrapper behavior)
+4. `docs/diagrams/pcpi_wrapper_realistic_block_diagram.drawio.xml`
 
 ## Dependencies (Install Before Running)
 
@@ -317,3 +335,7 @@ Generated artifacts:
 - `integration/pcpi_demo/results/pcpi_handoff.log`
 - `integration/pcpi_demo/results/pcpi_handoff_wave.vcd`
 - `integration/pcpi_demo/results/pcpi_handoff_summary.md`
+
+## License
+
+This repository is licensed under the MIT License. See `LICENSE`.
