@@ -286,6 +286,21 @@ For mentor/demo handoff, use this consolidated table first:
 
 - `integration/pcpi_demo/TEST_RESULTS_SUMMARY.md`
 
+Beginner RTL deep-dive docs:
+
+- `integration/pcpi_demo/docs/RTL_WRAPPER_LINE_BY_LINE.md`
+- `integration/pcpi_demo/docs/RTL_ACCELERATOR_LINE_BY_LINE.md`
+- `integration/pcpi_demo/docs/SYSTOLIC_ARRAY_FROM_SCRATCH.md`
+- `integration/pcpi_demo/docs/END_TO_END_BLOCK_INTERACTION.md`
+- `integration/pcpi_demo/docs/DESIGN_TRADEOFFS_AND_USE_CASES.md`
+
+Interactive architecture + handshake visualizer app:
+
+- `integration/pcpi_demo/visualizer/README.md`
+- `integration/pcpi_demo/visualizer/index.html`
+- Production URL: `https://tinyml-pcpi-visualizer.vercel.app`
+- Features now include per-arrow signal info popups, CPU stall/handoff explanation, architecture/project info modals, PE-level operand movement, and step-back navigation.
+
 Architecture contract draft for future SoC top-level:
 
 - `integration/pcpi_demo/SOC_MMIO_CONTRACT.md`

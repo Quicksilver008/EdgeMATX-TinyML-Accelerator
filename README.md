@@ -326,9 +326,13 @@ python .\integration\pcpi_demo\tests\real_to_q5_10_case.py --clear-generated
    - `integration/pcpi_demo/docs/RTL_ACCELERATOR_LINE_BY_LINE.md`
    - `integration/pcpi_demo/docs/SYSTOLIC_ARRAY_FROM_SCRATCH.md`
    - `integration/pcpi_demo/docs/END_TO_END_BLOCK_INTERACTION.md`
-8. Interactive web visualizer for architecture + handshake animation is at:
+8. Design-space and deployment tradeoff note is at:
+   - `integration/pcpi_demo/docs/DESIGN_TRADEOFFS_AND_USE_CASES.md`
+9. Interactive web visualizer for architecture + handshake animation is at:
    - `integration/pcpi_demo/visualizer/README.md`
    - `integration/pcpi_demo/visualizer/index.html`
+   - Production URL: `https://tinyml-pcpi-visualizer.vercel.app`
+   - It now includes per-arrow signal inspection, CPU stall/handoff guidance, project-level architecture info, PE dataflow view, step-back control, and draggable split-pane layout.
 
 Generated artifacts:
 

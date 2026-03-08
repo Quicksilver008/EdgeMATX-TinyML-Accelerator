@@ -10,6 +10,29 @@ This guide explains the entire project from zero background:
 4. what tests exist and how to run them
 5. how to test evaluator-provided custom matrix values live
 6. how to open waveforms in GTKWave (with saved `.gtkw` files)
+7. how to use the interactive visualizer for architecture, stall/handoff, and systolic dataflow explanation
+
+## Visualizer
+
+Interactive visualizer:
+1. local source: `integration/pcpi_demo/visualizer/`
+2. local entry: `integration/pcpi_demo/visualizer/index.html`
+3. production URL: `https://tinyml-pcpi-visualizer.vercel.app`
+
+What it shows:
+1. system architecture across CPU, wrapper, accelerator, and memory
+2. per-arrow signal inspection using small `i` buttons on architecture paths
+3. CPU stall/handoff explanation from the CPU block `i` button
+4. project-level opcode / Q5.10 / file-mapping explanation from `Architecture Info`
+5. PE-level operand movement in the 4x4 systolic array
+6. forward and backward stepping of the wrapper transaction
+
+How to use it in demo:
+1. use `App Guide` for explaining the four windows
+2. use `Architecture Info` when evaluators ask about opcode, Q5.10, files, or handshakes
+3. use the CPU `i` button when asked how the core stalls and resumes
+4. use per-arrow `i` buttons when asked which exact RTL signals travel on a path
+5. use `Step Back` if you overshoot a state during explanation
 
 ## 1) Are We Midsem-Ready?
 
@@ -623,6 +646,31 @@ Important code behavior:
 
 Why it matters:
 1. Enables same firmware source to consume dynamic custom case inputs.
+
+### 13.13 Dedicated RTL learning docs (new)
+
+Files:
+1. `integration/pcpi_demo/docs/RTL_WRAPPER_LINE_BY_LINE.md`
+2. `integration/pcpi_demo/docs/RTL_ACCELERATOR_LINE_BY_LINE.md`
+3. `integration/pcpi_demo/docs/SYSTOLIC_ARRAY_FROM_SCRATCH.md`
+4. `integration/pcpi_demo/docs/END_TO_END_BLOCK_INTERACTION.md`
+
+Why it matters:
+1. Gives beginner-focused deep explanation of wrapper FSM, systolic dataflow, and block interactions without changing RTL code.
+
+### 13.14 `integration/pcpi_demo/docs/DESIGN_TRADEOFFS_AND_USE_CASES.md`
+
+Function:
+1. Documents design directions for low power, low latency, high throughput, lower resource usage, and higher clock-frequency goals.
+
+Important content:
+1. Lists what hardware changes can be made for each goal.
+2. Explains the tradeoffs of those changes.
+3. Summarizes where this accelerator is a better fit than a heavy GPU.
+
+Why it matters:
+1. Helps explain future hardware roadmap decisions in a structured way during review or evaluation.
+2. Also documents practical deployment use cases and how the accelerator could be integrated with third-party CPU cores in either custom-instruction or future MMIO style.
 
 ## 14) Final Midsem Readiness Statement
 

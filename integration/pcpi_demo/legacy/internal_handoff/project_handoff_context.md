@@ -411,31 +411,42 @@ Note: summary and per-case expected JSON are currently ignored via `.gitignore`.
    - `integration/pcpi_demo/TEST_RESULTS_SUMMARY.md`
 10. Full beginner-friendly operation guide:
     - `integration/pcpi_demo/docs/MIDSEM_COMPLETE_PROJECT_GUIDE.md`
-11. Saved GTKWave sessions for repeatable demos are stored at:
+11. Interactive visualizer is active and deployed:
+    - source: `integration/pcpi_demo/visualizer/`
+    - prod URL: `https://tinyml-pcpi-visualizer.vercel.app`
+    - current UI includes:
+      - per-panel `Run / Step Back / Step / Reset`
+      - per-arrow `i` signal popups
+      - CPU `i` modal for PicoRV32 stall/handoff explanation
+      - `Architecture Info` modal for opcode / Q5.10 / files / signal groups
+      - top-level `App Guide` modal
+12. Saved GTKWave sessions for repeatable demos are stored at:
     - `integration/pcpi_demo/simulation/gtkwave/pcpi_demo_signals.gtkw`
     - `integration/pcpi_demo/simulation/gtkwave/pcpi_handoff_signals.gtkw`
-12. Evaluator custom real-input flow is isolated:
+13. Evaluator custom real-input flow is isolated:
     - baseline vectors: `integration/pcpi_demo/tests/cases.json`
     - custom generated vectors: `integration/pcpi_demo/tests/custom_cases.json`
     - cleanup command: `python .\integration\pcpi_demo\tests\real_to_q5_10_case.py --clear-generated`
-13. `run_pcpi_custom_case.ps1` and `run_pcpi_custom_cycle_compare.ps1` rewrite firmware inputs and use the shared firmware flow lock; do not run concurrent firmware-rewrite scripts without lock discipline.
-14. `run_pcpi_custom_cycle_compare.ps1` supports live mode with no arguments:
+14. `run_pcpi_custom_case.ps1` and `run_pcpi_custom_cycle_compare.ps1` rewrite firmware inputs and use the shared firmware flow lock; do not run concurrent firmware-rewrite scripts without lock discipline.
+15. `run_pcpi_custom_cycle_compare.ps1` supports live mode with no arguments:
     - reads `integration/pcpi_demo/tests/live_real_input.json`
     - auto-converts real to Q5.10
     - writes isolated generated case to `integration/pcpi_demo/tests/live_eval_cases.json`
     - runs accel + sw-no-mul + sw-mul
     - writes per-case real-format output JSON (`*_outputs_real.json`)
-15. Smoke-C and cycle-compare are unified at source level using:
+16. Smoke-C and cycle-compare are unified at source level using:
     - `integration/pcpi_demo/firmware/firmware_matmul_unified.c`
     Legacy files remain for fallback/reference:
     - `integration/pcpi_demo/legacy/firmware/firmware_c.c`
     - `integration/pcpi_demo/legacy/firmware/firmware_sw_matmul.c`
-16. Custom accelerator instruction remains explicit and fixed in firmware (`0x5420818b`);
+17. Custom accelerator instruction remains explicit and fixed in firmware (`0x5420818b`);
     compiler does not auto-convert generic nested matmul loops into this custom opcode.
-17. Repository organization update:
+18. Repository organization update:
     - primary standalone accelerator folder: `accel_standalone/`
     - legacy compatibility shim: `midsem_sim/`
     - fallback firmware references moved to: `integration/pcpi_demo/legacy/firmware/`
+19. Design-space and deployment tradeoff note:
+    - `integration/pcpi_demo/docs/DESIGN_TRADEOFFS_AND_USE_CASES.md`
 
 ## Immediate Next Work (Do In Order)
 
