@@ -1,0 +1,29 @@
+[dumpfile] "accel_standalone/results/midsem_wave.vcd"
+[savefile] "accel_standalone/simulation/gtkwave/midsem_signals.gtkw"
+[timestart] 0
+[size] 1600 600
+[pos] -1 -1
+*-13.000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[sst_width] 220
+[signals_width] 280
+[sst_expanded] 1
+[sst_vpaned_height] 150
+@200
+-Control Signals
+@28
+tb_matrix_accel_4x4.clk
+@28
+tb_matrix_accel_4x4.rst
+@28
+tb_matrix_accel_4x4.start
+@28
+tb_matrix_accel_4x4.busy
+@28
+tb_matrix_accel_4x4.done
+@22
+tb_matrix_accel_4x4.cycle_count[7:0]
+@200
+-Result Output (Q5.10 hex)
+@22
+tb_matrix_accel_4x4.c_flat[255:0]
+[pattern_trace] 1

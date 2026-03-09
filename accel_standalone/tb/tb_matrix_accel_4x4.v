@@ -278,6 +278,11 @@ module tb_matrix_accel_4x4;
     end
 
     initial begin
+        $dumpfile("accel_standalone/results/midsem_wave.vcd");
+        $dumpvars(0, tb_matrix_accel_4x4);
+    end
+
+    initial begin
         rst = 1'b1;
         start = 1'b0;
         a_flat = 256'd0;

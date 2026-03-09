@@ -1,0 +1,292 @@
+% ============================================================
+%  tacr_references.bib
+%  Bibliography for: Tiny Accelerator Coprocessor for RISC-V
+%  Covers: systolic arrays, RISC-V/PCPI, fixed-point arithmetic,
+%          application-context accelerator literature, and
+%          figure/image sources.
+% ============================================================
+
+% ----------------------------------------------------------
+% SECTION 1 – Systolic Array Architectures
+% ----------------------------------------------------------
+
+@inproceedings{mattimani2024fpga,
+  author    = {Mattimani, R. and Siddamal, S. V. and Vijay, H. M. and Shirol, S.},
+  title     = {{FPGA} Implementation of Systolic Array Architecture for Matrix Multiplication},
+  booktitle = {ICT for Intelligent Systems (ICTIS 2024)},
+  series    = {Lecture Notes in Networks and Systems},
+  volume    = {1112},
+  publisher = {Springer},
+  address   = {Singapore},
+  year      = {2024},
+  doi       = {10.1007/978-981-97-6684-0_5}
+}
+
+@inproceedings{shapri2024optimization,
+  author    = {Shapri, A. H. M. and Abdul Rahman, N. and Zakaria, S. M. M. S.
+               and Chieh, K. K. and Saat, S.},
+  title     = {Optimization and Analysis of {FPGA}-based Systolic Array for Matrix Multiplication},
+  booktitle = {AIP Conference Proceedings},
+  volume    = {2898},
+  number    = {1},
+  pages     = {030007},
+  year      = {2024},
+  doi       = {10.1063/5.0192098}
+}
+
+@article{wei2024faulttolerant,
+  author    = {Wei, X. and Yu, C. and Zhang, P. and others},
+  title     = {Highly Fault-Tolerant Systolic-Array-Based Matrix Multiplication},
+  journal   = {Electronics},
+  publisher = {MDPI},
+  volume    = {13},
+  number    = {9},
+  pages     = {1780},
+  year      = {2024},
+  doi       = {10.3390/electronics13091780}
+}
+
+@article{ye2023highfrequency,
+  author    = {Ye, W. and others},
+  title     = {High-Frequency Systolic Array-Based Transformer Accelerator
+               on Field Programmable Gate Arrays},
+  journal   = {Electronics},
+  publisher = {MDPI},
+  volume    = {12},
+  number    = {4},
+  pages     = {822},
+  year      = {2023},
+  doi       = {10.3390/electronics12040822}
+}
+
+% ----------------------------------------------------------
+% SECTION 2 – RISC-V, PCPI, and Custom Instructions
+% ----------------------------------------------------------
+
+@misc{wolf2024picorv32,
+  author       = {Wolf, Clifford},
+  title        = {{PicoRV32} -- {A} Size-Optimized {RISC-V} {CPU}},
+  howpublished = {GitHub repository, {YosysHQ}},
+  year         = {2024},
+  url          = {https://github.com/YosysHQ/picorv32},
+  note         = {Accessed 2026}
+}
+
+@article{balasubramanian2024riscv,
+  author  = {Balasubramanian, K. K. and others},
+  title   = {Designing {RISC-V} Instruction Set Extensions for Artificial
+             Neural Networks: {An} {LLVM} Compiler-Driven Perspective},
+  journal = {IEEE Access},
+  year    = {2024},
+  doi     = {10.1109/ACCESS.2024.3389673}
+}
+
+@inproceedings{salinas2024custom,
+  author    = {Salinas, G. and Sequeira, G. and Rodr{\'i}guez, A.
+               and Bispo, J. and Paulino, N.},
+  title     = {Implementation and Analysis of Custom Instructions on
+               {RISC-V} for Edge-{AI} Applications},
+  booktitle = {Proceedings of the 14th International Symposium on Highly
+               Efficient Accelerators and Reconfigurable Technologies (HEART '24)},
+  publisher = {ACM},
+  year      = {2024},
+  doi       = {10.1145/3665283.3665342}
+}
+
+@article{sharma2022extremedge,
+  author  = {Sharma, A. and others},
+  title   = {{EXTREM-EDGE} -- {EXtensions} To {RISC-V} for
+             Energy-Efficient {ML} Inference at the Edge of {IoT}},
+  journal = {Microprocessors and Microsystems},
+  volume  = {94},
+  pages   = {104620},
+  year    = {2022},
+  publisher = {Elsevier},
+  doi     = {10.1016/j.micpro.2022.104620}
+}
+
+@misc{anon2025fpgariesv,
+  author       = {Anonymous},
+  title        = {{FPGA}-Accelerated {RISC-V} {ISA} Extensions for Efficient
+                 Neural Network Inference on Edge Devices},
+  howpublished = {arXiv preprint},
+  year         = {2025},
+  eprint       = {2511.06955},
+  archivePrefix = {arXiv}
+}
+
+% ----------------------------------------------------------
+% SECTION 3 – Fixed-Point Arithmetic
+% ----------------------------------------------------------
+
+@article{nguyen2023qformat,
+  author  = {Nguyen, T. T. and others},
+  title   = {Neuromorphic Processor-Oriented Hybrid {Q}-Format Multiplication
+             with Adaptive Quantization for Tiny {YOLO3}},
+  journal = {Neural Computing and Applications},
+  publisher = {Springer},
+  year    = {2023},
+  doi     = {10.1007/s00521-023-08280-y}
+}
+
+@misc{dai2024qfx,
+  author       = {Dai, D. and others},
+  title        = {{QFX}: Trainable Fixed-Point Quantization for Deep Learning
+                 Acceleration on {FPGAs}},
+  howpublished = {arXiv preprint},
+  year         = {2024},
+  eprint       = {2401.17544},
+  archivePrefix = {arXiv}
+}
+
+@article{matinizadeh2025quantized,
+  author  = {Zhang, X. and Krestinskaya, O. and others},
+  title   = {Quantized Convolutional Neural Networks: {A} Hardware Perspective},
+  journal = {Frontiers in Electronics},
+  year    = {2025},
+  doi     = {10.3389/felec.2025.1469802}
+}
+
+@article{alshedivat2025fpgaqnn,
+  author  = {Tasci, E. and Istanbullu, A. and others},
+  title   = {{FPGA-QNN}: Quantized Neural Network Hardware Acceleration on {FPGAs}},
+  journal = {Applied Sciences},
+  publisher = {MDPI},
+  volume  = {15},
+  number  = {2},
+  pages   = {688},
+  year    = {2025},
+  doi     = {10.3390/app15020688}
+}
+
+% ----------------------------------------------------------
+% SECTION 4 – Application Context (Edge / Accelerator Landscape)
+% ----------------------------------------------------------
+
+@article{osman2022tinyml,
+  author  = {Osman, A. and others},
+  title   = {{TinyML}: Enabling of Inference Deep Learning Models on
+             Ultra-Low-Power {IoT} Edge Devices for {AI} Applications},
+  journal = {Micromachines},
+  publisher = {MDPI},
+  volume  = {13},
+  number  = {6},
+  pages   = {851},
+  year    = {2022},
+  doi     = {10.3390/mi13060851}
+}
+
+@misc{saha2025tinydl,
+  author       = {Somvanshi, Shriyank},
+  title        = {From Tiny Machine Learning to Tiny Deep Learning: {A} Survey},
+  howpublished = {arXiv preprint},
+  year         = {2025},
+  eprint       = {2506.18927},
+  archivePrefix = {arXiv}
+}
+
+@article{saiteja2024raman,
+  author  = {{Adithya Krishna}, P. and others},
+  title   = {{RAMAN}: {A} Re-configurable and Sparse {TinyML} Accelerator
+             for Inference on Edge},
+  journal = {IEEE Internet of Things Journal},
+  year    = {2024},
+  doi     = {10.1109/JIOT.2024.3386832}
+}
+
+@article{moosmann2025deploying,
+  author  = {{Ch Madhu Bhushan} and others},
+  title   = {Deploying {TinyML} for Energy-Efficient Object Detection and
+             Communication in Low-Power Edge {AI} Systems},
+  journal = {Scientific Reports},
+  publisher = {Nature Publishing Group},
+  year    = {2025},
+  doi     = {10.1038/s41598-025-27818-9}
+}
+
+@article{manzoni2025advancing,
+  author  = {{Pazmi{\~n}o Ortiz}, F. and others},
+  title   = {Advancing {TinyML} in {IoT}: {A} Holistic System-Level
+             Perspective for Resource-Constrained {AI}},
+  journal = {Future Internet},
+  publisher = {MDPI},
+  volume  = {17},
+  number  = {6},
+  pages   = {257},
+  year    = {2025},
+  doi     = {10.3390/fi17060257}
+}
+
+@misc{kaif2026visualizer_overview,
+  author       = {Nishchay, Nishchay Pallav},
+  title        = {RISC-V Accelerator Architecture Visualizer},
+  howpublished = {Interactive web-based architecture simulation},
+  year         = {2026},
+  url          = {https://riscv-visualizer-2.vercel.app/},
+  note         = {Interactive visualization developed for demonstrating system architecture and accelerator dataflow}
+}
+
+@misc{kaif2026visualizer_signals,
+  author       = {Omar, Mohammad Omar Sulemani},
+  title        = {RISC-V Processor and Coprocessor Signal-Level Visualizer},
+  howpublished = {Interactive web-based processor signal simulation},
+  year         = {2026},
+  url          = {https://tinyml-pcpi-visualizer.vercel.app/},
+  note         = {Interactive visualization showing processor execution signals, PCPI handshake, and systolic accelerator behavior}
+}
+
+@misc{fig_matrix_multiplication_bagdasar,
+  author       = {Bagdasar, Ovidiu},
+  title        = {Matrix Multiplication Diagram},
+  howpublished = {Figure 5 in \textit{Matrix Applications in Computer Graphics}. Available on ResearchGate},
+  year         = {2013},
+  url          = {https://www.researchgate.net/figure/Matrix-multiplication-diagram_fig5_299679931},
+  note         = {Original DOI: 10.1007/978-3-319-01751-8\_8}
+}
+
+% ----------------------------------------------------------
+% SECTION 6 - Foundational Concepts, Tools, and Methodology
+% ----------------------------------------------------------
+
+@techreport{asanovic2014instruction,
+  title={Instruction Sets Should Be Free: The Case For {RISC-V}},
+  author={Asanovi{\'c}, Krste and Patterson, David A},
+  institution={EECS Department, University of California, Berkeley},
+  number={UCB/EECS-2014-146},
+  year={2014},
+  url={http://www2.eecs.berkeley.edu/Pubs/TechRpts/2014/EECS-2014-146.html}
+}
+
+@incollection{kung1979systolic,
+  title={Systolic arrays (for {VLSI})},
+  author={Kung, Hsiang-Tsung and Leiserson, Charles E},
+  booktitle={Sparse Matrix Proceedings 1978},
+  pages={256--282},
+  year={1979},
+  publisher={SIAM},
+  doi={10.1137/1.9781611971071.19}
+}
+
+@misc{williams_icarus_verilog,
+  author={Williams, Stephen},
+  title={{Icarus Verilog}},
+  howpublished={\url{http://iverilog.icarus.com/}},
+  year={2024},
+  note={Open-source Verilog simulation and synthesis tool}
+}
+
+@manual{bybell_gtkwave,
+  title={{GTKWave} 3.3 Wave Analyzer User's Guide},
+  author={Bybell, Anthony J.},
+  year={2023},
+  note={Open-source waveform viewer. \url{https://gtkwave.sourceforge.net/}}
+}
+
+@book{bergeron2003writing,
+  title={Writing Testbenches: Functional Verification of HDL Models},
+  author={Bergeron, Janick},
+  year={2003},
+  publisher={Springer Science \& Business Media},
+  edition={2nd},
+  doi={10.1007/978-1-4615-0302-6}
+}
