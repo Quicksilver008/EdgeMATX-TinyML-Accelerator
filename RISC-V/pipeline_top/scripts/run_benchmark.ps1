@@ -1,11 +1,11 @@
 #!/usr/bin/env pwsh
 # run_benchmark.ps1
-# Builds both firmware hex files then runs the cycle benchmark simulation.
-# Run from: d:\Major_Project\EdgeMATX-TinyML-Accelerator\
+# Builds firmware then runs the cycle benchmark simulation.
 #
-# Usage:  .\RISC-V\pipeline_top\scripts\run_benchmark.ps1
+# Usage (from anywhere):  .\RISC-V\pipeline_top\scripts\run_benchmark.ps1
 
-$Root  = "d:\Major_Project\EdgeMATX-TinyML-Accelerator"
+# Derive workspace root from the script's own location — works on any machine.
+$Root  = (Resolve-Path "$PSScriptRoot\..\..\.." ).Path
 $PTop  = "$Root\RISC-V\pipeline_top"
 $FwDir = "$PTop\firmware"
 
@@ -16,7 +16,9 @@ Set-Location $Root
 # ────────────────────────────────────────────────────────────────────────────
 Write-Host ""
 Write-Host "=== Building firmware ==="
-$fwPath = "/mnt/d/Major_Project/EdgeMATX-TinyML-Accelerator/RISC-V/pipeline_top/firmware"
+# Convert Windows path to WSL mount path (e.g. D:\foo\bar -> /mnt/d/foo/bar)
+$_drive = $Root.Substring(0,1).ToLower()
+$fwPath = "/mnt/$_drive" + ($Root.Substring(2) -replace '\\','/') + "/RISC-V/pipeline_top/firmware"
 wsl -- bash -c "cd $fwPath && make firmware_sw_bench.hex 2>&1"
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Firmware build failed"; exit 1

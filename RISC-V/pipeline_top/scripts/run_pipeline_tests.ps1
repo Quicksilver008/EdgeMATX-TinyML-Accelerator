@@ -6,7 +6,8 @@
 # Usage (from workspace root):
 #   .\RISC-V\pipeline_top\scripts\run_pipeline_tests.ps1
 
-$Root = "d:\Major_Project\EdgeMATX-TinyML-Accelerator"
+# Derive workspace root from the script's own location — works on any machine.
+$Root = (Resolve-Path "$PSScriptRoot\..\..\.." ).Path
 $PTop = "$Root\RISC-V\pipeline_top"
 Set-Location $Root
 
@@ -87,7 +88,9 @@ Run-Test -Name "pcpi_regression" `
 # ── 4. Cycle benchmark (ACCEL + SW, full C-matrix check) ─────────────────────
 Write-Host ""
 Write-Host "=== cycle_benchmark ==="
-$fwPath = "/mnt/d/Major_Project/EdgeMATX-TinyML-Accelerator/RISC-V/pipeline_top/firmware"
+# Convert Windows path to WSL mount path
+$_drive = $Root.Substring(0,1).ToLower()
+$fwPath = "/mnt/$_drive" + ($Root.Substring(2) -replace '\\','/') + "/RISC-V/pipeline_top/firmware"
 wsl -- bash -c "cd $fwPath && make firmware_sw_bench.hex 2>&1" | Out-Null
 if ($LASTEXITCODE -ne 0) { Write-Error "Firmware build failed"; exit 1 }
 

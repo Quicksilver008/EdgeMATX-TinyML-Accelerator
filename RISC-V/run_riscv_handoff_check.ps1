@@ -10,8 +10,9 @@
 #
 # All tests must pass for exit code 0.
 
-$Root = Split-Path -Parent $MyInvocation.MyCommand.Path
-Set-Location (Split-Path -Parent $Root)   # workspace root
+# Derive workspace root from script location — works on any machine.
+$Root = (Resolve-Path "$PSScriptRoot\..").Path
+Set-Location $Root
 
 $pass = 0
 $fail = 0

@@ -39,6 +39,8 @@ pynq_z2_custom_core/build/*.out
 # RISC-V simulation artifacts
 RISC-V/pipeline_top/*.vcd
 RISC-V/pipeline_top/firmware/*.map
+RISC-V/pipeline_top/firmware/*.elf
+RISC-V/pipeline_top/firmware/*.bin
 RISC-V/accelerator/results/*.out
 RISC-V/accelerator/results/*.log
 

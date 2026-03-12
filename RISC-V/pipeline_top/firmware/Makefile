@@ -34,7 +34,7 @@ FIRMWARE_SRC ?= firmware_pipeline_matmul.c
 #     make EXTRA_CFLAGS="-DMATMUL_MODE_ACCEL=1 -DUSE_EXTERNAL_CASE_DATA"
 # ─────────────────────────────────────────────────────────────────────────────
 
-all: firmware.hex firmware_sw_bench.hex
+all: firmware.hex firmware_sw_bench.hex firmware_accel_bench.hex
 
 firmware.elf: $(FIRMWARE_SRC) sections.lds
 	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) \
@@ -55,7 +55,8 @@ firmware.dis: firmware.elf
 
 clean:
 	rm -f firmware.elf firmware.bin firmware.hex firmware.map firmware.dis \
-	      firmware_sw_bench.elf firmware_sw_bench.bin firmware_sw_bench.hex firmware_sw_bench.map firmware_sw_bench.dis
+	      firmware_sw_bench.elf firmware_sw_bench.bin firmware_sw_bench.hex firmware_sw_bench.map firmware_sw_bench.dis \
+	      firmware_accel_bench.elf firmware_accel_bench.bin firmware_accel_bench.hex firmware_accel_bench.map firmware_accel_bench.dis
 
 # ── SW bench firmware (no .rodata, for Harvard-safe cycle benchmarking) ───────
 firmware_sw_bench.elf: firmware_sw_bench.c sections.lds
@@ -74,5 +75,20 @@ firmware_sw_bench.hex: firmware_sw_bench.bin $(PICORV32_MAKEHEX)
 
 firmware_sw_bench.dis: firmware_sw_bench.elf
 	$(OBJDUMP) -d $< > $@
+
+# ── Accel bench firmware (issues CUSTOM-0 matmul instruction via PCPI) ────────
+firmware_accel_bench.elf: firmware_accel_bench.c sections.lds
+	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) \
+		-mabi=$(ABI) -march=$(ARCH) \
+		-ffreestanding -nostdlib \
+		-o $@ \
+		-Wl,--build-id=none,-Bstatic,-T,sections.lds,-Map,firmware_accel_bench.map,--strip-debug \
+		firmware_accel_bench.c $(LDLIBS)
+
+firmware_accel_bench.bin: firmware_accel_bench.elf
+	$(OBJCOPY) -O binary $< $@
+
+firmware_accel_bench.hex: firmware_accel_bench.bin $(PICORV32_MAKEHEX)
+	$(PYTHON) $(PICORV32_MAKEHEX) firmware_accel_bench.bin $(WORDS) > $@
 
 .PHONY: all clean
