@@ -31,3 +31,7 @@ integration/pcpi_demo/firmware/*.map
 integration/pcpi_demo/firmware/*.dis
 integration/pcpi_demo/firmware/.firmware_flow.lock
 pynq_z2_custom_core/build/*.out
+
+# Simulation build artifacts (root-level strays)
+/*.vcd
+*.vvp
