@@ -1,0 +1,43 @@
+[dumpfile] "D:/Major_Project/EdgeMATX-TinyML-Accelerator/RISC-V/pipeline_top/simulation/tb_pipeline_pcpi_regression.vcd"
+[savefile] "D:/Major_Project/EdgeMATX-TinyML-Accelerator/RISC-V/pipeline_top/simulation/gtkwave/pcpi_regression.gtkw"
+[timestart] 0
+[size] 1600 900
+[pos] 0 0
+*-1 0 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] tb_pipeline_pcpi_regression.
+[treeopen] tb_pipeline_pcpi_regression.dut.
+[signals_width] 260
+@28
+tb_pipeline_pcpi_regression.clk
+@28
+tb_pipeline_pcpi_regression.rst
+@200
+-
+@22
+tb_pipeline_pcpi_regression.dbg_pc_if[31:0]
+@22
+tb_pipeline_pcpi_regression.dbg_instr_if[31:0]
+@22
+tb_pipeline_pcpi_regression.dbg_instr_id[31:0]
+@200
+-
+@28
+tb_pipeline_pcpi_regression.dbg_stall
+@28
+tb_pipeline_pcpi_regression.dbg_custom_inflight
+@28
+tb_pipeline_pcpi_regression.dbg_accel_done
+@200
+-
+@28
+tb_pipeline_pcpi_regression.dbg_wb_regwrite
+@22
+tb_pipeline_pcpi_regression.dbg_wb_rd[4:0]
+@22
+tb_pipeline_pcpi_regression.dbg_wb_data[31:0]
+@200
+----- C matrix result (256-bit flat) -----
+@22
+tb_pipeline_pcpi_regression.mat_c_flat[255:0]
+[pattern_trace] 1
+[pattern_trace] 0

@@ -1,0 +1,75 @@
+TB_INFO status=BEGIN_HARDENING_REGRESSION random_seed=0x20260303
+TB_INFO test=identity status=START
+TB_PASS test=identity
+RESULT test=identity pass=1 accel_cycles=10
+TB_INFO test=ones status=START
+TB_PASS test=ones
+RESULT test=ones pass=1 accel_cycles=10
+TB_INFO test=signed_mixed status=START
+TB_PASS test=signed_mixed
+RESULT test=signed_mixed pass=1 accel_cycles=10
+TB_INFO test=overflow_wrap status=START
+TB_PASS test=overflow_wrap
+RESULT test=overflow_wrap pass=1 accel_cycles=10
+TB_INFO test=start_while_busy status=START
+TB_INFO test=start_while_busy action=EXTRA_START_WHILE_BUSY
+TB_PASS test=start_while_busy
+RESULT test=start_while_busy pass=1 accel_cycles=10
+TB_INFO test=reset_abort status=START
+TB_INFO test=reset_abort action=ASSERT_RESET_MID_RUN
+TB_PASS test=reset_abort
+RESULT test=reset_abort pass=1 accel_cycles=0
+TB_INFO test=post_reset_recovery status=START
+TB_PASS test=post_reset_recovery
+RESULT test=post_reset_recovery pass=1 accel_cycles=10
+TB_INFO test=random_0 status=START
+TB_PASS test=random
+TB_PASS test=random_0
+RESULT test=random_0 pass=1 accel_cycles=10
+TB_INFO test=random_1 status=START
+TB_PASS test=random
+TB_PASS test=random_1
+RESULT test=random_1 pass=1 accel_cycles=10
+TB_INFO test=random_2 status=START
+TB_PASS test=random
+TB_PASS test=random_2
+RESULT test=random_2 pass=1 accel_cycles=10
+TB_INFO test=random_3 status=START
+TB_PASS test=random
+TB_PASS test=random_3
+RESULT test=random_3 pass=1 accel_cycles=10
+TB_INFO test=random_4 status=START
+TB_PASS test=random
+TB_PASS test=random_4
+RESULT test=random_4 pass=1 accel_cycles=10
+TB_INFO test=random_5 status=START
+TB_PASS test=random
+TB_PASS test=random_5
+RESULT test=random_5 pass=1 accel_cycles=10
+TB_INFO test=random_6 status=START
+TB_PASS test=random
+TB_PASS test=random_6
+RESULT test=random_6 pass=1 accel_cycles=10
+TB_INFO test=random_7 status=START
+TB_PASS test=random
+TB_PASS test=random_7
+RESULT test=random_7 pass=1 accel_cycles=10
+TB_INFO test=random_8 status=START
+TB_PASS test=random
+TB_PASS test=random_8
+RESULT test=random_8 pass=1 accel_cycles=10
+TB_INFO test=random_9 status=START
+TB_PASS test=random
+TB_PASS test=random_9
+RESULT test=random_9 pass=1 accel_cycles=10
+TB_INFO test=random_10 status=START
+TB_PASS test=random
+TB_PASS test=random_10
+RESULT test=random_10 pass=1 accel_cycles=10
+TB_INFO test=random_11 status=START
+TB_PASS test=random
+TB_PASS test=random_11
+RESULT test=random_11 pass=1 accel_cycles=10
+SUMMARY pass=19 total=19
+TB_PASS summary pass=19 total=19
+D:\Major_Project\EdgeMATX-TinyML-Accelerator\RISC-V\accelerator\tb\tb_matrix_accel_4x4.v:408: $finish called at 2805000 (1ps)

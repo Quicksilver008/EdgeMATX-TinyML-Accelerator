@@ -35,3 +35,14 @@ pynq_z2_custom_core/build/*.out
 # Simulation build artifacts (root-level strays)
 /*.vcd
 *.vvp
+
+# LaTeX build artifacts
+docs/major/*.aux
+docs/major/*.bbl
+docs/major/*.blg
+docs/major/*.lof
+docs/major/*.log
+docs/major/*.lot
+docs/major/*.out
+docs/major/*.toc
+docs/major/__pycache__/

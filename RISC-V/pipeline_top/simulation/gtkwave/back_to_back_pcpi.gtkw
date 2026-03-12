@@ -1,0 +1,43 @@
+[dumpfile] "D:/Major_Project/EdgeMATX-TinyML-Accelerator/RISC-V/pipeline_top/simulation/tb_pipeline_back_to_back_pcpi.vcd"
+[savefile] "D:/Major_Project/EdgeMATX-TinyML-Accelerator/RISC-V/pipeline_top/simulation/gtkwave/back_to_back_pcpi.gtkw"
+[timestart] 0
+[size] 1600 900
+[pos] 0 0
+*-1 0 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] tb_pipeline_back_to_back_pcpi.
+[treeopen] tb_pipeline_back_to_back_pcpi.dut.
+[signals_width] 260
+@28
+tb_pipeline_back_to_back_pcpi.clk
+@28
+tb_pipeline_back_to_back_pcpi.rst
+@200
+-
+@22
+tb_pipeline_back_to_back_pcpi.dbg_pc_if[31:0]
+@22
+tb_pipeline_back_to_back_pcpi.dbg_instr_if[31:0]
+@22
+tb_pipeline_back_to_back_pcpi.dbg_instr_id[31:0]
+@200
+-
+@28
+tb_pipeline_back_to_back_pcpi.dbg_stall
+@28
+tb_pipeline_back_to_back_pcpi.dbg_custom_inflight
+@28
+tb_pipeline_back_to_back_pcpi.dbg_accel_done
+@200
+-
+@28
+tb_pipeline_back_to_back_pcpi.dbg_wb_regwrite
+@22
+tb_pipeline_back_to_back_pcpi.dbg_wb_rd[4:0]
+@22
+tb_pipeline_back_to_back_pcpi.dbg_wb_data[31:0]
+@200
+----- C matrix (flat 256-bit, 16 x Q5.10) -----
+@22
+tb_pipeline_back_to_back_pcpi.mat_c_flat[255:0]
+[pattern_trace] 1
+[pattern_trace] 0

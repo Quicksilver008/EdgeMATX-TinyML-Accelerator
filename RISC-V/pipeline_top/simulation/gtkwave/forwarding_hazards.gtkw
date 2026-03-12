@@ -1,0 +1,46 @@
+[dumpfile] "D:/Major_Project/EdgeMATX-TinyML-Accelerator/RISC-V/pipeline_top/simulation/tb_pipeline_forwarding_hazards.vcd"
+[dumpfile_mtime] "Thu Mar 12 00:00:00 2026"
+[dumpfile_size] 0
+[savefile] "D:/Major_Project/EdgeMATX-TinyML-Accelerator/RISC-V/pipeline_top/simulation/gtkwave/forwarding_hazards.gtkw"
+[timestart] 0
+[size] 1600 900
+[pos] 0 0
+*-1 0 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] tb_pipeline_forwarding_hazards.
+[treeopen] tb_pipeline_forwarding_hazards.dut.
+[signals_width] 250
+[objdump_modpath] tb_pipeline_forwarding_hazards.dut
+@28
+tb_pipeline_forwarding_hazards.clk
+@28
+tb_pipeline_forwarding_hazards.rst
+@200
+-
+@22
+tb_pipeline_forwarding_hazards.dut.pc_if
+@22
+tb_pipeline_forwarding_hazards.dbg_instr_if[31:0]
+@22
+tb_pipeline_forwarding_hazards.dbg_instr_id[31:0]
+@200
+-
+@28
+tb_pipeline_forwarding_hazards.dbg_stall
+@28
+tb_pipeline_forwarding_hazards.dbg_wb_regwrite
+@22
+tb_pipeline_forwarding_hazards.dbg_wb_rd[4:0]
+@22
+tb_pipeline_forwarding_hazards.dbg_wb_data[31:0]
+@200
+----- Register Results -----
+@22
+tb_pipeline_forwarding_hazards.rf[2][31:0]
+@22
+tb_pipeline_forwarding_hazards.rf[4][31:0]
+@22
+tb_pipeline_forwarding_hazards.rf[7][31:0]
+@22
+tb_pipeline_forwarding_hazards.rf[9][31:0]
+[pattern_trace] 1
+[pattern_trace] 0
