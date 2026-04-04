@@ -1,6 +1,6 @@
 """
 EdgeMATX Presentation Generator  v2
-Produces: EdgeMATX_presentation.pptx  (17 slides)
+Produces: EdgeMATX_presentation.pptx  (18 slides)
 Run:  python generate_ppt.py
 """
 
@@ -971,7 +971,125 @@ def slide_speedup(prs):
     add_transition(s)
     return s
 
-# ── SLIDE 14: INTERACTIVE VISUALIZERS ─────────────────────────────────────────
+# ── SLIDE 14: MLPerf TINY PROXY BENCHMARK ─────────────────────────────────────
+def slide_mlperf_proxy(prs):
+    s = blank(prs)
+    set_bg(s)
+    header(s, "MLPerf Tiny Proxy Benchmark",
+           "Industry-standard framing via MLCommons Tiny Anomaly Detection proxy on PicoRV32")
+    footer(s)
+
+    # Top context strip
+    rect(s, Inches(0.4), Inches(1.35), Inches(12.5), Inches(1.15),
+         fill=CARD, line=CYAN, lw=Pt(1.5))
+    pill(s, Inches(0.58), Inches(1.52), "MLCommons Tiny", fill=CYAN, text_col=BG)
+    box(s, "MLPerf Tiny is the most widely used industry benchmark family for tiny edge-AI inference.",
+        Inches(2.55), Inches(1.47), Inches(9.9), Inches(0.34),
+        size=14, bold=True, color=WHITE)
+    box(s, "EdgeMATX accelerates the tiled matrix-multiply kernel, so we report an Anomaly Detection proxy run: same mapped workload, same 100 MHz assumption, and a fair three-way comparison across HW, RV32I software, and RV32IM software.",
+        Inches(0.58), Inches(1.86), Inches(11.0), Inches(0.5),
+        size=12, color=GRAY)
+    url_box(s, "mlcommons/tiny benchmark reference",
+            "https://github.com/mlcommons/tiny",
+            Inches(10.25), Inches(2.02), Inches(2.45), Inches(0.25),
+            size=11, col=ORANGE)
+
+    # Left: graphical view
+    rect(s, Inches(0.4), Inches(2.72), Inches(5.55), Inches(4.22),
+         fill=CARD2, line=ORANGE, lw=Pt(1.5))
+    box(s, "Graphical View: Relative Compute Cost",
+        Inches(0.58), Inches(2.84), Inches(5.1), Inches(0.35),
+        size=16, bold=True, color=ORANGE)
+    box(s, "Per 4x4 tile, normalized to HW = 1x cost",
+        Inches(0.58), Inches(3.12), Inches(5.1), Inches(0.25),
+        size=11, color=GRAY)
+
+    for i, (label, value, latency, col) in enumerate([
+        ("HW Accel",   1.0,   "6.00 ms",    CYAN),
+        ("SW MUL",    68.0,   "408.27 ms", YELLOW),
+        ("SW no-MUL", 222.9,  "1337.86 ms", RED),
+    ]):
+        y = Inches(3.62) + i * Inches(0.92)
+        box(s, label,
+            Inches(0.62), y - Inches(0.03), Inches(1.35), Inches(0.25),
+            size=12, bold=True, color=WHITE)
+        rect(s, Inches(2.0), y, Inches(2.55), Inches(0.22),
+             fill=RGBColor(0x0B, 0x14, 0x2A), line=GRAY, lw=Pt(0.5))
+        rect(s, Inches(2.0), y,
+             max(int(Inches(0.14)), int(Inches(2.55) * (value / 222.9))), Inches(0.22),
+             fill=col, line=None)
+        box(s, f"{value:.1f}x",
+            Inches(4.7), y - Inches(0.06), Inches(0.7), Inches(0.3),
+            size=12, bold=True, color=col, align=PP_ALIGN.RIGHT)
+        box(s, latency,
+            Inches(4.75), y + Inches(0.2), Inches(0.95), Inches(0.22),
+            size=10, color=GRAY, align=PP_ALIGN.RIGHT)
+
+    rect(s, Inches(0.62), Inches(6.42), Inches(5.1), Inches(0.36),
+         fill=RGBColor(0x00, 0x20, 0x10), line=GREEN, lw=Pt(0.8))
+    box(s, "Key takeaway: only the accelerator path meets the <10 ms MLPerf Tiny AD target.",
+        Inches(0.72), Inches(6.47), Inches(4.9), Inches(0.22),
+        size=11, bold=True, color=GREEN, align=PP_ALIGN.CENTER)
+
+    # Right: exact benchmark table
+    rect(s, Inches(6.15), Inches(2.72), Inches(6.75), Inches(4.22),
+         fill=CARD, line=CYAN, lw=Pt(1.5))
+    box(s, "Exact Benchmark Numbers",
+        Inches(6.32), Inches(2.84), Inches(3.6), Inches(0.32),
+        size=16, bold=True, color=CYAN)
+    box(s, "Same benchmark task, same clock, same Q5.10 data format",
+        Inches(6.32), Inches(3.12), Inches(4.5), Inches(0.24),
+        size=11, color=GRAY)
+
+    cols_x = [Inches(6.32), Inches(9.55), Inches(10.62), Inches(11.70)]
+    col_w  = [Inches(3.18), Inches(1.05), Inches(1.05), Inches(1.02)]
+    row_h  = Inches(0.34)
+    y0 = Inches(3.46)
+
+    for x, w, txt in [
+        (cols_x[0], col_w[0], "Metric"),
+        (cols_x[1], col_w[1], "HW"),
+        (cols_x[2], col_w[2], "SW_I"),
+        (cols_x[3], col_w[3], "SW_IM"),
+    ]:
+        rect(s, x, y0, w, row_h, fill=RGBColor(0x08, 0x10, 0x1C), line=CYAN, lw=Pt(0.6))
+        box(s, txt, x, y0 + Inches(0.05), w, Inches(0.2),
+            size=11, bold=True, color=CYAN,
+            align=PP_ALIGN.LEFT if txt == "Metric" else PP_ALIGN.CENTER)
+
+    rows = [
+        ("Cycles / 4x4 tile",   "117.2",   "26130.0",   "7974.0"),
+        ("Speedup vs HW",       "1x",      "222.9x",    "68.0x"),
+        ("Proxy cycles (32)",   "3752",    "836160",    "255168"),
+        ("AD cycles",           "600320",  "133785600", "40826880"),
+        ("AD ms @ 100 MHz",     "6.00",    "1337.86",   "408.27"),
+        ("AD target (<10ms)",   "MEETS",   "EXCEEDS",   "EXCEEDS"),
+        ("SW_I / SW_IM benefit", "--",     "--",        "3.3x"),
+        ("+30% ovhd ms",        "7.80",    "1739.21",   "530.75"),
+    ]
+
+    for i, row in enumerate(rows):
+        y = y0 + row_h + i * row_h
+        fill_col = CARD2 if i % 2 == 0 else CARD
+        for j in range(4):
+            rect(s, cols_x[j], y, col_w[j], row_h, fill=fill_col, line=GRAY, lw=Pt(0.3))
+            val = row[j]
+            txt_col = WHITE
+            if val == "MEETS":
+                txt_col = GREEN
+            elif val == "EXCEEDS":
+                txt_col = RED
+            elif j == 3 and row[0] == "SW_I / SW_IM benefit":
+                txt_col = YELLOW
+            box(s, val, cols_x[j] + Inches(0.03), y + Inches(0.045),
+                col_w[j] - Inches(0.06), Inches(0.22),
+                size=10, bold=(i == 5), color=txt_col,
+                align=PP_ALIGN.LEFT if j == 0 else PP_ALIGN.CENTER)
+
+    add_transition(s)
+    return s
+
+# ── SLIDE 15: INTERACTIVE VISUALIZERS ─────────────────────────────────────────
 def slide_visualizers(prs):
     s = blank(prs)
     set_bg(s)
@@ -1039,7 +1157,7 @@ def slide_visualizers(prs):
     add_transition(s)
     return s
 
-# ── SLIDE 15: FUTURE WORK ─────────────────────────────────────────────────────
+# ── SLIDE 16: FUTURE WORK ─────────────────────────────────────────────────────
 def slide_future(prs):
     s = blank(prs)
     set_bg(s)
@@ -1091,7 +1209,7 @@ def slide_future(prs):
     add_transition(s)
     return s
 
-# ── SLIDE 16: CONCLUSION ──────────────────────────────────────────────────────
+# ── SLIDE 17: CONCLUSION ──────────────────────────────────────────────────────
 def slide_conclusion(prs):
     s = blank(prs)
     set_bg(s)
@@ -1137,7 +1255,7 @@ def slide_conclusion(prs):
     add_transition(s)
     return s
 
-# ── SLIDE 17: THANK YOU ───────────────────────────────────────────────────────
+# ── SLIDE 18: THANK YOU ───────────────────────────────────────────────────────
 def slide_thankyou(prs):
     s = blank(prs)
     set_bg(s)
@@ -1200,7 +1318,7 @@ def slide_thankyou(prs):
 
 def build():
     prs = make_prs()
-    print("Building EdgeMATX presentation (17 slides)...")
+    print("Building EdgeMATX presentation (18 slides)...")
 
     slide_title(prs)        ; print("  [OK] Slide  1 - Title")
     slide_introduction(prs) ; print("  [OK] Slide  2 - Introduction")
@@ -1215,10 +1333,11 @@ def build():
     slide_results_tests(prs); print("  [OK] Slide 11 - Test Results")
     slide_cycles(prs)       ; print("  [OK] Slide 12 - Cycle Counts")
     slide_speedup(prs)      ; print("  [OK] Slide 13 - Speedup")
-    slide_visualizers(prs)  ; print("  [OK] Slide 14 - Visualizers")
-    slide_future(prs)       ; print("  [OK] Slide 15 - Future Work")
-    slide_conclusion(prs)   ; print("  [OK] Slide 16 - Conclusion")
-    slide_thankyou(prs)     ; print("  [OK] Slide 17 - Thank You")
+    slide_mlperf_proxy(prs) ; print("  [OK] Slide 14 - MLPerf Tiny Proxy")
+    slide_visualizers(prs)  ; print("  [OK] Slide 15 - Visualizers")
+    slide_future(prs)       ; print("  [OK] Slide 16 - Future Work")
+    slide_conclusion(prs)   ; print("  [OK] Slide 17 - Conclusion")
+    slide_thankyou(prs)     ; print("  [OK] Slide 18 - Thank You")
 
     out = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                        "EdgeMATX_presentation.pptx")

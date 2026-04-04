@@ -23,6 +23,86 @@ The repository is organized around a simulation-first workflow:
 3. Firmware-driven smoke, regression, handoff, professor-demo, and cycle-compare flows are available.
 4. FPGA timing closure and on-board performance measurement remain future work.
 
+## Numerical Snapshot (Latest Verified - 2026-04-04)
+
+### PicoRV32 Integration Cycle Comparison
+
+Cycle-compare summary (`integration/pcpi_demo/results/pcpi_cycle_compare_summary.json`, generated `2026-04-04T02:01:54Z`):
+
+| Metric | Value |
+|---|---:|
+| Accelerator cycles | 673 |
+| Software cycles (no MUL, rv32i) | 26130 |
+| Software cycles (MUL enabled, rv32im) | 7975 |
+| Speedup: SW no-MUL / accelerator | 38.8262x |
+| Speedup: SW MUL / accelerator | 11.8499x |
+| Speedup: SW no-MUL / SW MUL | 3.2765x |
+| Cycle reduction: accelerator vs SW no-MUL | 97.42% |
+| Cycle reduction: accelerator vs SW MUL | 91.56% |
+
+### PicoRV32 MLPerf Tiny Anomaly Detection Proxy
+
+MLPerf proxy benchmark (`integration/pcpi_demo/scripts/run_picorv_mlperf.ps1`, verified `2026-04-04`):
+
+| Metric | HW Accelerator | SW (rv32i) | SW (rv32im) |
+|---|---:|---:|---:|
+| Cycles per 4x4 tile | 117.2 | 26130.0 | 7974.0 |
+| Proxy cycles (32 tiles) | 3,752 | 836,160 | 255,168 |
+| AD inference cycles (5120 tiles) | 600,320 | 133,785,600 | 40,826,880 |
+| AD inference @ 100 MHz | 6.00 ms | 1337.86 ms | 408.27 ms |
+| MLPerf Tiny target (<10ms) | **MEETS** | EXCEEDS | EXCEEDS |
+| Speedup vs HW accelerator | 1.0x | 222.9x slower | 68.0x slower |
+| SW MUL benefit vs SW no-MUL | -- | -- | 3.3x faster |
+
+### RV32 Pipeline MLPerf Tiny Anomaly Detection Proxy
+
+MLPerf proxy benchmark (`RISC-V/pipeline_top/scripts/run_mlperf_proxy.ps1`, verified `2026-04-04`):
+
+| Metric | HW Accelerator | SW (RV32I) |
+|---|---:|---:|
+| Cycles per 4x4 tile | 50.4 | 2579.0 |
+| Proxy cycles (32 tiles) | 1,612 | 82,528 |
+| AD inference cycles (5120 tiles) | 257,920 | 13,204,480 |
+| AD inference @ 100 MHz | 2.58 ms | 132.04 ms |
+| MLPerf Tiny target (<10ms) | **MEETS** | EXCEEDS |
+| Speedup vs HW accelerator | 1.0x | 51.2x slower |
+
+### RV32 Pipeline 4x4 Cycle Benchmark
+
+Single 4x4 matmul benchmark (`RISC-V/pipeline_top/scripts/run_benchmark.ps1`, verified `2026-04-04`):
+
+| Metric | Value |
+|---|---:|
+| ACCEL cycles (pcpi_valid → pcpi_ready) | 37 |
+| SW cycles (reset → sentinel) | 2,580 |
+| Speedup (SW/ACCEL) | 69.7x |
+
+### Standalone Accelerator Verification
+
+Standalone RTL verification (`accel_standalone/scripts/run_midsem_sim.ps1`, verified `2026-04-04`):
+
+| Metric | Value |
+|---|---:|
+| Total test cases | 19 |
+| Passed | 19 |
+| Failed | 0 |
+| Pass rate | 100% |
+| Accelerator cycles (per 4x4 matmul) | 10 |
+
+Test coverage includes: identity, ones, signed_mixed, overflow_wrap, start_while_busy, reset_abort, post_reset_recovery, and 12 randomized cases.
+
+### RV32 Pipeline Regression Tests
+
+Pipeline test suite (`RISC-V/pipeline_top/scripts/run_pipeline_tests.ps1`, verified `2026-04-04`):
+
+| Test Suite | Cases | Result |
+|---|---:|---|
+| forwarding_hazards | 4/4 | **PASS** |
+| back_to_back_pcpi | 2/2 | **PASS** |
+| pcpi_regression | 4/4 | **PASS** |
+| cycle_benchmark | 1/1 | **PASS** |
+| **Total** | **11/11** | **PASS** |
+
 ## Repository Map
 
 1. `start_here/`: quick-entry docs and evaluation flow.
@@ -229,6 +309,74 @@ Run from repository root:
 ```
 
 This runs an explainable set of matrix cases (identity, negative identity, zero, half-scale, signed passthrough) and produces a concise demo summary.
+
+## MLPerf Tiny Proxy Benchmarks
+
+### PicoRV32 MLPerf Proxy
+
+Run from repository root:
+
+```powershell
+.\integration\pcpi_demo\scripts\run_picorv_mlperf.ps1
+```
+
+This benchmark extrapolates to MLCommons Tiny Anomaly Detection inference performance and compares HW accelerator vs SW (rv32i) vs SW (rv32im) implementations. Demonstrates that the HW accelerator meets the <10ms target while software implementations exceed it.
+
+Generated artifacts:
+- Real-time cycle counts and speedups displayed in console
+- Comparative analysis for 32-tile proxy and 5120-tile AD inference
+
+Latest results (2026-04-04):
+- HW accelerator: 6.00 ms @ 100 MHz (MEETS target)
+- SW rv32i: 1337.86 ms (EXCEEDS target, 222.9x slower)
+- SW rv32im: 408.27 ms (EXCEEDS target, 68.0x slower)
+
+### RV32 Pipeline MLPerf Proxy
+
+Run from repository root:
+
+```powershell
+.\RISC-V\pipeline_top\scripts\run_mlperf_proxy.ps1
+```
+
+Similar MLPerf Tiny AD proxy for the custom RV32 pipeline core with PCPI accelerator integration.
+
+Latest results (2026-04-04):
+- HW accelerator: 2.58 ms @ 100 MHz (MEETS target)
+- SW RV32I: 132.04 ms (EXCEEDS target, 51.2x slower)
+
+## RV32 Pipeline Tests
+
+### Full Pipeline Test Suite
+
+Run from repository root:
+
+```powershell
+.\RISC-V\pipeline_top\scripts\run_pipeline_tests.ps1
+```
+
+Comprehensive test suite covering:
+1. Pipeline forwarding and hazard detection
+2. Back-to-back PCPI custom instructions
+3. PCPI regression (4 matrix cases)
+4. Cycle benchmark comparison
+
+Latest results (2026-04-04): All 11/11 tests PASSED
+
+### Single 4x4 Cycle Benchmark
+
+Run from repository root:
+
+```powershell
+.\RISC-V\pipeline_top\scripts\run_benchmark.ps1
+```
+
+Reports accelerator vs software cycle counts for a single 4x4 matrix multiplication.
+
+Latest results (2026-04-04):
+- ACCEL: 37 cycles
+- SW: 2,580 cycles
+- Speedup: 69.7x
 
 ## Cycle Scaling Estimator
 

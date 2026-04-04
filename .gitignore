@@ -44,6 +44,10 @@ RISC-V/pipeline_top/firmware/*.bin
 RISC-V/accelerator/results/*.out
 RISC-V/accelerator/results/*.log
 
+# Custom case generated files (regenerated on each run)
+RISC-V/pipeline_top/tb/custom_case_data.vh
+RISC-V/pipeline_top/results/custom_cases/*.log
+
 # LaTeX build artifacts
 docs/major/*.aux
 docs/major/*.bbl

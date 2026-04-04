@@ -103,15 +103,60 @@ Packed word format: `{C[r][c+1][15:0], C[r][c][15:0]}` (even column in lower hal
 | `rs2` | B base pointer (byte addr) |
 | `rd` | ignored (result in C memory) |
 
-## Benchmark Results
+## Latest Test Results (2026-04-04)
 
-| Mode | Cycles |
-|------|--------|
-| ACCEL (CUSTOM_MATMUL) | 37 |
-| SW (packed RV32I loop) | 6655 |
-| **Speedup** | **179.8×** |
+### Full Test Suite
 
-SW firmware uses a row-outer loop: 8 LW A + 32 LW B + 8 SW C = 48 memory ops per matrix multiply.
+| Test Suite | Cases | Result |
+|---|---:|---|
+| forwarding_hazards | 4/4 | **PASS** |
+| back_to_back_pcpi | 2/2 | **PASS** |
+| pcpi_regression | 4/4 | **PASS** |
+| cycle_benchmark | 1/1 | **PASS** |
+| **Total** | **11/11** | **100% PASS** |
+
+Test coverage includes:
+- **Pipeline hazards**: EX/MEM forwarding, MEM/WB forwarding, load-use stalls, WB bypass
+- **PCPI handshaking**: Back-to-back custom instructions without corruption
+- **Matrix correctness**: Identity, ones, mixed-sign, zero matrices
+- **Performance**: Cycle-accurate accelerator vs software comparison
+
+### 4x4 Cycle Benchmark
+
+| Metric | Value |
+|---|---:|
+| ACCEL cycles (pcpi_valid → pcpi_ready) | 37 |
+| SW cycles (reset → sentinel) | 2,580 |
+| **Speedup (SW/ACCEL)** | **69.7x** |
+
+Accelerator breakdown:
+- 8 memory reads (A matrix, 2 elements/word)
+- 8 memory reads (B matrix, 2 elements/word)
+- ~12 systolic compute cycles
+- 8 memory writes (C matrix, 2 elements/word)
+
+SW firmware uses packed 2-elem/word row-outer loop: 8 LW A + 32 LW B + 8 SW C = 48 memory ops.
+
+### MLPerf Tiny Anomaly Detection Proxy Benchmark
+
+Run MLCommons Tiny Anomaly Detection proxy benchmark:
+
+```powershell
+.\RISC-V\pipeline_top\scripts\run_mlperf_proxy.ps1
+```
+
+Latest results (2026-04-04):
+
+| Metric | HW Accelerator | SW (RV32I) |
+|---|---:|---:|
+| Cycles per 4x4 tile | 50.4 | 2,579.0 |
+| Proxy cycles (32 tiles) | 1,612 | 82,528 |
+| AD inference cycles (5120 tiles) | 257,920 | 13,204,480 |
+| **AD inference @ 100 MHz** | **2.58 ms** | 132.04 ms |
+| **MLPerf Tiny target (<10ms)** | **MEETS ✓** | EXCEEDS ✗ |
+| **Speedup vs HW** | 1.0x | 51.2x slower |
+
+The hardware accelerator achieves **2.58 ms** for a full Anomaly Detection inference, well below the 10ms MLPerf Tiny target. Software implementation takes **132.04 ms**, exceeding the target by 13x.
 
 ## PCPI Interface Ports (rv32_pipeline_top.v)
 

@@ -34,7 +34,7 @@ FIRMWARE_SRC ?= firmware_pipeline_matmul.c
 #     make EXTRA_CFLAGS="-DMATMUL_MODE_ACCEL=1 -DUSE_EXTERNAL_CASE_DATA"
 # ─────────────────────────────────────────────────────────────────────────────
 
-all: firmware.hex firmware_sw_bench.hex firmware_accel_bench.hex
+all: firmware.hex firmware_sw_bench.hex firmware_accel_bench.hex firmware_mlperf_proxy.hex
 
 firmware.elf: $(FIRMWARE_SRC) sections.lds
 	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) \
@@ -56,7 +56,8 @@ firmware.dis: firmware.elf
 clean:
 	rm -f firmware.elf firmware.bin firmware.hex firmware.map firmware.dis \
 	      firmware_sw_bench.elf firmware_sw_bench.bin firmware_sw_bench.hex firmware_sw_bench.map firmware_sw_bench.dis \
-	      firmware_accel_bench.elf firmware_accel_bench.bin firmware_accel_bench.hex firmware_accel_bench.map firmware_accel_bench.dis
+	      firmware_accel_bench.elf firmware_accel_bench.bin firmware_accel_bench.hex firmware_accel_bench.map firmware_accel_bench.dis \
+	      firmware_mlperf_proxy.elf firmware_mlperf_proxy.bin firmware_mlperf_proxy.hex firmware_mlperf_proxy.map firmware_mlperf_proxy.dis
 
 # ── SW bench firmware (no .rodata, for Harvard-safe cycle benchmarking) ───────
 firmware_sw_bench.elf: firmware_sw_bench.c sections.lds
@@ -90,5 +91,23 @@ firmware_accel_bench.bin: firmware_accel_bench.elf
 
 firmware_accel_bench.hex: firmware_accel_bench.bin $(PICORV32_MAKEHEX)
 	$(PYTHON) $(PICORV32_MAKEHEX) firmware_accel_bench.bin $(WORDS) > $@
+
+# ── MLPerf Tiny proxy firmware (N_TILES=32 tiles, models AD benchmark) ────────
+firmware_mlperf_proxy.elf: firmware_mlperf_proxy.c sections.lds
+	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) \
+		-mabi=$(ABI) -march=$(ARCH) \
+		-ffreestanding -nostdlib \
+		-o $@ \
+		-Wl,--build-id=none,-Bstatic,-T,sections.lds,-Map,firmware_mlperf_proxy.map,--strip-debug \
+		firmware_mlperf_proxy.c $(LDLIBS)
+
+firmware_mlperf_proxy.bin: firmware_mlperf_proxy.elf
+	$(OBJCOPY) -O binary $< $@
+
+firmware_mlperf_proxy.hex: firmware_mlperf_proxy.bin $(PICORV32_MAKEHEX)
+	$(PYTHON) $(PICORV32_MAKEHEX) firmware_mlperf_proxy.bin $(WORDS) > $@
+
+firmware_mlperf_proxy.dis: firmware_mlperf_proxy.elf
+	$(OBJDUMP) -d $< > $@
 
 .PHONY: all clean

@@ -39,42 +39,45 @@ typedef   signed int   int32_t;
 typedef   signed short int16_t;
 typedef unsigned int   uint32_t;
 
-// Q5.10 fixed-point multiply — radix-4 shift-and-add.
+// Q5.10 fixed-point multiply — binary shift-and-add.
 //
-// Processes TWO bits of b per iteration (Booth radix-4 principle):
-//   bits[1:0] = 0 → add 0       (no-op)
-//   bits[1:0] = 1 → add 1×a
-//   bits[1:0] = 2 → add 2×a
-//   bits[1:0] = 3 → add 3×a (= 1×a + 2×a)
+// Inlined at every call site so _start has no outgoing calls → GCC generates
+// no function prologue → the "li sp" inline-asm at the top of _start runs
+// before any stack access.  Binary shift (not radix-4) keeps the inner loop
+// to {ua, ub, acc} only — no 2*ua scratch register — so four sequential
+// expansions inside the k-loop cannot alias each other's neg flag.
 //
-// This halves the maximum iteration count: 16-bit b → max 8 loops
-// instead of 16, cutting multiply cycles by ~40% for the typical Q5.10
-// range (values cluster near 0 so high bits are zero, exits early).
-//
-// Compiles to ~9 instructions/iteration on rv32i (ANDI×2, BEQ×2,
-// ADD, SLLI, SLLI, SRLI, BNE) — same pipeline-friendly pattern as before.
-// No JAL required; always_inline keeps it fused at each call site.
+// Both inputs signed Q5.10; returns (a × b) >> 10, matching pe_cell_q5_10.v.
 static inline __attribute__((always_inline)) int32_t q5_10_mul(int16_t a, int16_t b) {
     int32_t  ia  = (int32_t)a;
+    int32_t  ib  = (int32_t)b;
     int32_t  acc = 0;
-    /* zero-extend b via unsigned int (uint32_t not available — use uint trick) */
-    unsigned int ub = (unsigned int)(unsigned short)b;
-    if (ub == 0u) return 0;
-    do {
-        unsigned int bits = ub & 3u;
-        if (bits & 1u) acc += ia;            /* bit 0: add 1×a */
-        if (bits & 2u) acc += (ia + ia);     /* bit 1: add 2×a */
-        ia <<= 2;                             /* advance multiplicand 2 positions */
-        ub >>= 2;                             /* consume 2 bits */
-    } while (ub);
+    int      neg = 0;
+    /* Normalise both inputs to non-negative so the shift loop works.
+     * Track combined sign and apply at the end. */
+    if (ia < 0) { ia = -ia; neg ^= 1; }
+    if (ib < 0) { ib = -ib; neg ^= 1; }
+    if (ia == 0 || ib == 0) return 0;
+    {
+        unsigned int ua = (unsigned int)ia;
+        unsigned int ub = (unsigned int)ib;
+        /* Simple binary shift-and-add; 16 iterations maximum. */
+        do {
+            if (ub & 1u) acc += (int32_t)ua;
+            ua <<= 1;
+            ub >>= 1;
+        } while (ub);
+    }
+    if (neg) acc = -acc;
     return acc >> 10;
 }
 
-void _start(void) __attribute__((noreturn));
+/* Single entry-point.  always_inline on q5_10_mul means _start contains no
+ * outgoing calls, so GCC emits no function prologue.  The volatile asm sets
+ * sp before any C-generated stack access occurs. */
+__attribute__((noreturn, section(".text.startup")))
 void _start(void) {
-    // Set up stack before any local variable use.
-    __asm__ volatile ("li sp, 0x3f8");
-
+    __asm__ volatile ("li sp, 0x3f8" ::: "memory");
     // Packed layout: 2 Q5.10 elements per 32-bit word.
     // A[row][col]: word A[row*2 + col/2], half = (col&1) ? [31:16] : [15:0]
     // B[k][col]:   word B[k*2   + col/2], half = (col&1) ? [31:16] : [15:0]

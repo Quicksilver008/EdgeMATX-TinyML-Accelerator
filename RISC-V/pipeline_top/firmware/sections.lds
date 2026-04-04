@@ -12,7 +12,7 @@ SECTIONS
 {
   . = 0x00000000;
 
-  .text   : { *(.text*)   }
+  .text   : { *(.text.startup) *(.text*)   }
   .rodata : { *(.rodata*) }
   .data   : { *(.data*)   }
   .bss    : { *(.bss*) *(COMMON) }
